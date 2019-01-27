@@ -6,9 +6,11 @@ This is the attempt to reverse engineer the protocol between the hoermann bisecu
 The goal is to be able to build an adapter for home automation system to control the garage doors from the automation software. Especially to be able to get the door open when you drive home automatically.
 
 ## Protocol
-I'm not an expert in reverse engineering nor IP protocols, so my findongs could be sometimes wrong :-)
+I'm not an expert in reverse engineering nor IP protocols, so my findings could be sometimes wrong :-)
 
 ### Discovery
+See file Discovery.kt
+
 The app looks for a gateway in the local network by sending out an UDP message to Port 4001 (Destination= 255.255.255.255) with the following payload `<Discover target="LogicBox" />`
 
 The gateway returns the following UDP package to port 4002 at the App's IP:
