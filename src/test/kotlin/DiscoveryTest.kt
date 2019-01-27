@@ -12,6 +12,6 @@ internal class DiscoveryTest {
         val discovery = Discovery()
         val server = discovery.startServer()
         discovery.sendDiscoveryRequest()
-        server.join()
+        val discoveryData = server.join()
     }
 }

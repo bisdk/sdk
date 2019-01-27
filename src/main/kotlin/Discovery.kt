@@ -8,6 +8,7 @@ import javax.xml.parsers.DocumentBuilderFactory
 
 data class DiscoveryData(
         val mac: String,
+        val sourceAddress: InetAddress,
         val swVersion: String,
         val hwVersion: String,
         val protocol: String
@@ -32,14 +33,14 @@ class Discovery {
         return CompletableFuture.supplyAsync() {
             serverSocket.receive(receivePacket)
             val sentence = String(receivePacket.data.copyOf(receivePacket.length))
-            println("RECEIVED: $sentence")
+//            println("RECEIVED: $sentence")
             val dbFactory = DocumentBuilderFactory.newInstance()
             val dBuilder = dbFactory.newDocumentBuilder()
             val xmlInput = InputSource(StringReader(sentence))
             val doc = dBuilder.parse(xmlInput)
             val element = doc.documentElement
-            println("Element name: ${element.tagName}")
-            val data = DiscoveryData(element.getAttribute("mac"), element.getAttribute("swVersion"), element.getAttribute("hwVersion"), element.getAttribute("protocol"))
+//            println("Element name: ${element.tagName}")
+            val data = DiscoveryData(element.getAttribute("mac"), receivePacket.address, element.getAttribute("swVersion"), element.getAttribute("hwVersion"), element.getAttribute("protocol"))
             println("Gateway data: $data")
             data
         }

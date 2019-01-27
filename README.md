@@ -29,11 +29,16 @@ The messages that are exchanged over the TCP connection have the following forma
 Byte 0..5: Sender Address 
 Byte 6..11: Receiver Address
 The sender / Receiver address of the Gateway seems to be the mac address, the address of the app seems to be `000000000000` or `00000000000` + last byte 1..9
-The last two bytes seem to be some kind of checksum. Which one, I couldn't find out.
+Byte 12..13: body length
+Byte 14: Tag
+Byte 15..18: Session Id
+Byte 19: Command
+PAYLOAD
+The last two bytes seem to be some kind of checksum. 
 
 #### Authentication
 The request fromthe app to the gateway for authentication seems to have the following format:
-`{appId: 6byte}{gatewayId: 6byte}00{bodyLength:1 byte}000000000010{userNameLength: 1byte}{userNameHex}{passwordHex}{checksum: 2byte}`
+`{appId: 6byte}{gatewayId: 6byte}00{bodyLength:2 byte}000000000010{userNameLength: 1byte}{userNameHex}{passwordHex}{checksum: 2byte}`
 
 Example (I x-ed out my MAC :-):
 `000000000000XXXXXXXXXXXX00190000000000100674686F6D61736161616262626363632DF0`
