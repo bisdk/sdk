@@ -5,6 +5,10 @@ This is the attempt to reverse engineer the protocol between the hoermann bisecu
 
 The goal is to be able to build an adapter for home automation system to control the garage doors from the automation software. Especially to be able to get the door open when you drive home automatically.
 
+## Example code
+See Startup class for flow implementation. 
+It makes a discovery request first and then tries to execute a get name request. 
+
 ## Protocol
 I'm not an expert in reverse engineering nor IP protocols, so my findings could be sometimes wrong :-)
 
