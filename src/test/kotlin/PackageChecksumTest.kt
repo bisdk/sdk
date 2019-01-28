@@ -1,12 +1,12 @@
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 
-internal class ChecksumTest {
+internal class PackageChecksumTest {
 
     @Test
     fun calculate() {
         val testPackage = Package(command = Command.LOGIN, payload = Payload.login("thomas", "aaabbbccc"))
-        val checksum = Checksum(testPackage).calculate()
-        Assertions.assertThat(encodeInt(checksum)).isEqualTo("2d")
+        val checksum = PackageChecksum(testPackage).calculate()
+        Assertions.assertThat(encodeInt(checksum)).isEqualToIgnoringCase("2d")
     }
 }

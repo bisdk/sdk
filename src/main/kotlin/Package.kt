@@ -6,7 +6,6 @@ enum class Command(val code: Int) {
 }
 
 class Length {
-
     companion object {
         val BYTE_LENGTH = 2
         val ADDRESS_SIZE = 6 * BYTE_LENGTH
@@ -23,7 +22,7 @@ data class Package(
         val command: Command,
         val tag: Int = 0,
         val token: Int = 0,
-        val payload: Payload
+        val payload: Payload = Payload.empty()
 ) {
     fun toByteArray(): ByteArray {
         return getLength().toShort().toByteArray()
@@ -31,45 +30,42 @@ data class Package(
                 .plus(token.toByteArray())
                 .plus(command.code.toByte().toByteArray()) // TODO if this is a response: set 8-th bit (| 128)
                 .plus(payload.toByteArray())
-                .plus(getChecksum().toByte().toByteArray())
-    }
-
-    fun getChecksum(): Int {
-        var value = getLength()
-        value += this.tag
-        value += (this.token.toInt() and 255)
-        value += (this.token.toInt() shr 8 and 255)
-        value += (this.token.toInt() shr 16 and 255)
-        value += (this.token.toInt() shr 24 and 255)
-        value += this.command.code
-        payload.toByteArray().forEach {
-            value += it.toByte()
-        }
-        value = value and 255
-        return value
-
-    }
-
-    fun getFrameLength(): Int {
-        return Length.FRAME_SIZE / Length.BYTE_LENGTH
+                .plus(PackageChecksum(this).calculate().toByte().toByteArray())
     }
 
     fun getLength(): Int {
         return getFrameLength() + payload.toByteArray().size
     }
+
+    private fun getFrameLength(): Int {
+        return Length.FRAME_SIZE / Length.BYTE_LENGTH
+    }
+
+    override fun toString(): String {
+        return toByteArray().joinToString(separator = "") { encodeInt(it.toInt()) }
+    }
+
+
 }
 
-class Payload(val content: ByteArray) {
+data class Payload(
+        private val content: ByteArray
+) {
 
     fun toByteArray(): ByteArray {
         return content
     }
 
+    override fun toString(): String {
+        return toByteArray().joinToString(separator = "") { encodeInt(it.toInt()) }
+    }
+
     companion object {
-        fun login(username: String, password: String) = Payload(username.length.toByte().toByteArray().plus(username.toByteArray())+ password.toByteArray())
+        fun login(username: String, password: String) = Payload(username.length.toByte().toByteArray().plus(username.toByteArray()) + password.toByteArray())
+        fun empty() = Payload(ByteArray(0))
     }
 }
 
-fun Int.toByteArray() = ByteBuffer.allocate(4).putInt(this).array()
-fun Short.toByteArray() = ByteBuffer.allocate(2).putShort(this).array()
+fun Int.toByteArray() = ByteBuffer.allocate(4).putInt(this).array()!!
+fun Short.toByteArray() = ByteBuffer.allocate(2).putShort(this).array()!!
 fun Byte.toByteArray() = ByteArray(1).apply { set(0, this@toByteArray) }

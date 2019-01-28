@@ -1,4 +1,4 @@
-class Checksum(val pack: Package) {
+class PackageChecksum(val pack: Package) {
 
     fun calculate(): Int {
         var value = pack.getLength()

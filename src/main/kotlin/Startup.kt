@@ -6,11 +6,7 @@ class Startup {
         discovery.sendDiscoveryRequest()
         val discoveryData = future.join()
 
-        val server = Server()
-        val serverFuture = server.init()
-
-        val client = Client(discoveryData.sourceAddress)
-        client.sendMessage()
-        serverFuture.join()
+        val client = Client(discoveryData.sourceAddress, "000000000000", discoveryData.getGatewayId())
+        client.sendMessage(Package(Command.GET_NAME))
     }
 }

@@ -12,7 +12,9 @@ data class DiscoveryData(
         val swVersion: String,
         val hwVersion: String,
         val protocol: String
-)
+) {
+    fun getGatewayId() = mac.replace(":", "").toUpperCase()
+}
 
 class Discovery {
 
