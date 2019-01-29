@@ -3,7 +3,9 @@ class TransportContainer(
         val receiver: String,
         val pack: Package
 ) {
-    fun toByteArray() = sender.parseHexToByteArray().plus(receiver.parseHexToByteArray()).plus(pack.toByteArray()).plus(TransportContainerChecksum(this).calculate().toByteArray())
+    fun toByteArray() = (sender + receiver + pack.toString() + encodeByte(TransportContainerChecksum(this).calculate().toUByte(), 1)).toByteArray()
+
+    override fun toString() = sender + receiver + pack.toString() + encodeByte(TransportContainerChecksum(this).calculate().toUByte(), 1)
 }
 
 fun String.parseHexToByteArray(): ByteArray {

@@ -34,7 +34,6 @@ class Client(
         println("Sending message " + messageBytes.joinToString(separator = "") { encodeByte(it.toUByte()) })
         dataOut.write(messageBytes)
         dataOut.flush()
-        readBytes()
     }
 
     fun readBytes(): Int {
