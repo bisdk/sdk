@@ -7,6 +7,11 @@ class Startup {
         val discoveryData = future.join()
 
         val client = Client(discoveryData.sourceAddress, "000000000000", discoveryData.getGatewayId())
-        client.sendMessage(Package(Command.GET_NAME))
+        var readBytes = client.readBytes()
+        // should read 5410EC03615000000000000600090153BA3FD391BAB9
+        while (readBytes == 0) {
+            client.reconnect()
+            readBytes = client.readBytes()
+        }
     }
 }
