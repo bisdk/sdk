@@ -40,6 +40,8 @@ The messages that are exchanged over the TCP connection have the following forma
 * PAYLOAD
 * The second last byte is the checksum of the inner part (body with payload) and the last byte is the checksum of the whole message. 
 
+The whole hex value array is converted to a string (as human readable hex string) and this is converted to bytes and sent through th TCP connection.
+
 #### Get Name
 The get name request is the first request made from APP to GW.
 
