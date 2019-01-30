@@ -31,13 +31,13 @@ class Client(
         println("Sending message $message")
         val tc = TransportContainer(sender, receiver, message)
         val messageBytes = tc.toByteArray()
-        println("Sending message " + messageBytes.joinToString(separator = "") { encodeByte(it.toUByte()) })
+        println("Sending transport container $tc")
         dataOut.write(messageBytes)
         dataOut.flush()
     }
 
-    fun readBytes(): Int {
-        var bytesRead = 0
+    fun readBytes(): ByteArray {
+        val bytesRead = ArrayList<Byte>()
         println("Reading from socket...")
         val timeout = 2000
         val startTime =  System.currentTimeMillis()
@@ -47,11 +47,11 @@ class Client(
         if(dataIn.available() == 0) {
             println("No Data read")
         }
-        while (dataIn.available() > 0 && bytesRead < 30) {
-            print(encodeInt(dataIn.readUnsignedByte()))
-            bytesRead++
+        while (dataIn.available() > 0 && bytesRead.size < 30) {
+            bytesRead.add(decodeByte(dataIn.readUnsignedByte().toByte()))
         }
-        return bytesRead
+        println("Received from socket: " + bytesRead.map { it.toChar().toString() }.joinToString(separator = ""))
+        return bytesRead.toByteArray()
     }
 
     fun close() {

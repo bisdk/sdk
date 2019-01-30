@@ -13,9 +13,5 @@ class Startup {
         readBytes = client.readBytes()
         client.sendMessage(Package(command = Command.LOGIN, payload = Payload.login("admin", "aundt")))
         readBytes = client.readBytes()
-        while (readBytes == 0) {
-            client.reconnect()
-            readBytes = client.readBytes()
-        }
     }
 }

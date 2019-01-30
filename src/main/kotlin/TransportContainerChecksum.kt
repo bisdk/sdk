@@ -3,7 +3,7 @@ class TransportContainerChecksum(val tp: TransportContainer) {
     fun calculate(): Byte {
         var value = 0
         val str = tp.sender + tp.receiver + tp.pack.toString()
-        println("Calculating checksum for $str")
+//        println("Calculating checksum for $str")
         str.forEach {
             value += it.toByte()
         }
