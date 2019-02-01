@@ -1,20 +1,13 @@
-import java.nio.ByteBuffer
-
 enum class Command(val code: Int) {
+    EMPTY(0),
+    ERROR(1),
+    GET_MAC(2),
+    SET_VALUE(3),
     LOGIN(16),
-    GET_NAME(38)
-}
+    GET_NAME(38);
 
-class Length {
     companion object {
-        val BYTE_LENGTH = 2
-        val ADDRESS_SIZE = 6 * BYTE_LENGTH
-        val LENGTH_SIZE = 2 * BYTE_LENGTH
-        val TAG_SIZE = 1 * BYTE_LENGTH
-        val TOKEN_SIZE = 4 * BYTE_LENGTH
-        val COMMAND_SIZE = 1 * BYTE_LENGTH
-        val CHECKSUM_SIZE = 1 * BYTE_LENGTH
-        val FRAME_SIZE = LENGTH_SIZE + TAG_SIZE + TOKEN_SIZE + COMMAND_SIZE + CHECKSUM_SIZE
+        fun valueOf(code: Int) = values().firstOrNull { it.code == code }
     }
 }
 
@@ -38,13 +31,37 @@ data class Package(
     }
 
     private fun getFrameLength(): Int {
-        return Length.FRAME_SIZE / Length.BYTE_LENGTH
+        return Lengths.FRAME_SIZE / Lengths.BYTE_LENGTH
+    }
+
+    fun toHexString(): String {
+        return toByteArray().toHexString()
     }
 
     override fun toString(): String {
-        return toByteArray().joinToString(separator = "") { encodeInt(it.toInt()) }
+        return "command: $command, tag: $tag, token: $token, payload: $payload"
     }
 
+    companion object {
+        fun empty() = Package(Command.EMPTY)
+
+        fun from(ba: ByteArray): Package {
+            if(ba.size < Lengths.LENGTH_BYTES +  Lengths.TAG_BYTES + Lengths.TOKEN_BYTES + Lengths.COMMAND_BYTES) {
+                return empty()
+            }
+            var idx = 0
+            val length = (ba.copyOfRange(idx, idx + Lengths.LENGTH_BYTES).toHexString()).toInt(16)
+            idx += Lengths.LENGTH_BYTES
+            val tag = (ba.copyOfRange(idx, idx + Lengths.TAG_BYTES).toHexString()).toInt(16)
+            idx += Lengths.TAG_BYTES
+            val token = (ba.copyOfRange(idx, idx + Lengths.TOKEN_BYTES).toHexString()).toInt(16)
+            idx += Lengths.TOKEN_BYTES
+            val commandInt = (ba.copyOfRange(idx, idx + Lengths.COMMAND_BYTES).toHexString()).toInt(16)
+            idx += Lengths.COMMAND_BYTES
+            val command = Command.valueOf(commandInt)!!
+            return Package(command = command, tag= tag, token = token, payload = Payload(ba.copyOfRange(idx, ba.size - 1)))
+        }
+    }
 
 }
 
@@ -66,6 +83,3 @@ data class Payload(
     }
 }
 
-fun Int.toByteArray() = ByteBuffer.allocate(4).putInt(this).array()!!
-fun Short.toByteArray() = ByteBuffer.allocate(2).putShort(this).array()!!
-fun Byte.toByteArray() = ByteArray(1).apply { set(0, this@toByteArray) }

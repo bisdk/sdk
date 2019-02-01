@@ -6,10 +6,10 @@ import java.net.Socket
 
 class Client(
         private val address: InetAddress,
-        private val sender: String,
-        private val receiver: String,
+        private var sender: String,
+        private var receiver: String,
         private val port: Int = 4000
-) {
+): AutoCloseable {
 
     var s: Socket = Socket(address, port)
     var dataOut = DataOutputStream(s.getOutputStream())
@@ -30,13 +30,23 @@ class Client(
     fun sendMessage(message: Package) {
         println("Sending message $message")
         val tc = TransportContainer(sender, receiver, message)
-        val messageBytes = tc.toByteArray()
-        println("Sending transport container $tc")
+        val messageBytes = tc.toByteArray().encodeTC()
+        println("Sending transport container ${tc.toHexString()}")
+        println("Raw: ${tc.toByteArray().encodeTC().toHexString()}")
         dataOut.write(messageBytes)
         dataOut.flush()
     }
 
-    fun readBytes(): ByteArray {
+    fun readAnswer(): Package {
+        val ba = readBytes()
+        val tc = TransportContainer.from(ba)
+        println("Received: $tc")
+//        sender = tc.receiver
+//        receiver = tc.sender
+        return tc.pack
+    }
+
+    private fun readBytes(): ByteArray {
         val bytesRead = ArrayList<Byte>()
         println("Reading from socket...")
         val timeout = 2000
@@ -48,13 +58,14 @@ class Client(
             println("No Data read")
         }
         while (dataIn.available() > 0 && bytesRead.size < 30) {
-            bytesRead.add(decodeByte(dataIn.readUnsignedByte().toByte()))
+            bytesRead.add(dataIn.readUnsignedByte().toByte())
         }
-        println("Received from socket: " + bytesRead.map { it.toChar().toString() }.joinToString(separator = ""))
-        return bytesRead.toByteArray()
+        val ba = bytesRead.toByteArray().decodeTC()
+        println("Received from socket: " + ba.toHexString())
+        return ba
     }
 
-    fun close() {
+    override fun close() {
         dataOut.close()
         dataIn.close()
         s.close()

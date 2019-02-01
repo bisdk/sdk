@@ -9,8 +9,10 @@ class Startup {
         val client = Client(discoveryData.sourceAddress, "000000000000", discoveryData.getGatewayId())
         // should read 5410EC03615000000000000600090153BA3FD391BAB9
         client.sendMessage(Package(Command.GET_NAME))
-        var readBytes = client.readBytes()
+        var answer = client.readAnswer()
+        println("Answer: " + answer)
         client.sendMessage(Package(command = Command.LOGIN, payload = Payload.login("thomas", "aaabbbccc")))
-        readBytes = client.readBytes()
+        answer = client.readAnswer()
+        println("Answer: " + answer)
     }
 }
