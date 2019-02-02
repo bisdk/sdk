@@ -7,7 +7,10 @@ The goal is to be able to build an adapter for home automation system to control
 
 ## Example code
 See Startup class for flow implementation. 
-It makes a discovery request first and then tries to execute a get name request. 
+Currently working:
+- Discovery
+- Get Name as first request
+- Login with setting of resulting token in client
 
 ## Protocol
 I'm not an expert in reverse engineering nor IP protocols, so my findings could be sometimes wrong :-)
