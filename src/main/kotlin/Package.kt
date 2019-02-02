@@ -6,14 +6,14 @@ import java.math.BigInteger
 data class Package(
         val command: Command,
         val tag: Int = 0,
-        val token: Int = 0,
+        val token: String = "00000000",
         val payload: Payload = Payload.empty(),
         val isResponse: Boolean = false
 ) {
     fun toByteArray(): ByteArray {
         return getLength().toShort().toByteArray()
                 .plus(tag.toByte().toByteArray())
-                .plus(token.toByteArray())
+                .plus(token.toHexByteArray())
                 .plus(command.code.toByte().toByteArray())
                 .plus(payload.toByteArray())
                 .plus(PackageChecksum(this).calculate().toByte().toByteArray())
@@ -32,7 +32,7 @@ data class Package(
     }
 
     override fun toString(): String {
-        return "command: $command, tag: $tag, token: ${token.toByteArray().toHexString()}, payload: $payload (${payload.getContentAsString()}), isResponse=$isResponse"
+        return "command: $command, tag: $tag, token: $token, payload: $payload (${payload.getContentAsString()}), isResponse=$isResponse"
     }
 
     companion object {
@@ -49,7 +49,7 @@ data class Package(
             idx += Lengths.LENGTH_BYTES
             val tag = (ba.copyOfRange(idx, idx + Lengths.TAG_BYTES).toHexString()).toInt(16)
             idx += Lengths.TAG_BYTES
-            val token = (ba.copyOfRange(idx, idx + Lengths.TOKEN_BYTES).toHexString()).toInt(16)
+            val token = ba.copyOfRange(idx, idx + Lengths.TOKEN_BYTES).toHexString()
             idx += Lengths.TOKEN_BYTES
             var commandInt = (ba.copyOfRange(idx, idx + Lengths.COMMAND_BYTES).toHexString()).toInt(16)
             var isResponse = false

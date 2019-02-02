@@ -13,11 +13,12 @@ class Command(val code: Int, val name: String = "UNKNOWN") {
         val SET_VALUE = Command(3, "SET_VALUE")
         val JMCP = Command(6, "JMCP")
         val LOGIN = Command(16, "LOGIN")
+        val LOGOUT = Command(17, "LOGOUT")
         val GET_NAME = Command(38, "GET_NAME")
         val SET_STATE = Command(51, "SET_STATE")
         val HM_GET_TRANSITION = Command(112, "HM_GET_TRANSITION")
 
-        val values = arrayListOf(EMPTY, ERROR, GET_MAC, SET_VALUE, JMCP, LOGIN, GET_NAME, SET_STATE, HM_GET_TRANSITION)
+        val values = arrayListOf(EMPTY, ERROR, GET_MAC, SET_VALUE, JMCP, LOGIN, LOGOUT, GET_NAME, SET_STATE, HM_GET_TRANSITION)
     }
 
     override fun toString(): String {

@@ -21,5 +21,6 @@ class Startup {
         clientAPI.login("thomas", "aaabbbccc")
         val groups = clientAPI.getGroupsForUser()
         println("Groups: " + groups)
+        clientAPI.setState(groups[0].ports[0])
     }
 }

@@ -12,7 +12,7 @@ class Client(
         private val address: InetAddress,
         private var sender: String,
         private var receiver: String,
-        private var token: String = "",
+        var token: String = "00000000",
         private val port: Int = 4000
 ) : AutoCloseable {
 
@@ -33,8 +33,9 @@ class Client(
     }
 
     fun sendMessage(message: Package) {
-        println("Sending message $message")
-        val tc = TransportContainer(sender, receiver, message)
+        val pack = message.copy(token = token)
+        println("Sending package $pack")
+        val tc = TransportContainer(sender, receiver, pack)
         val messageBytes = tc.toByteArray().encodeToGW()
         println("Sending transport container ${tc.toHexString()}")
         println("Raw: ${tc.toByteArray().encodeToGW().toHexString()}")
@@ -44,12 +45,16 @@ class Client(
 
     fun readAnswer(): Package {
         val ba = readBytes()
+        if(ba.size < Lengths.ADDRESS_BYTES * 2) {
+            println("No valid answer received: " + ba.toHexString())
+            return Package.empty()
+        }
         val tc = TransportContainer.from(ba)
         println("Received: $tc")
         if(tc.pack.command == Command.LOGIN) {
             println("Received answer of LOGIN command => setting senderId and token")
             sender = tc.receiver
-            token = tc.pack.payload.toByteArray().toHexString()
+            token = tc.pack.payload.toByteArray().toHexString().substring(2)
         }
         return tc.pack
     }

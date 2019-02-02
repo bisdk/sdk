@@ -26,4 +26,10 @@ class ClientAPI(val client: Client) {
         return groups
     }
 
+    fun setState(port: Port): Package {
+        client.sendMessage(Package(command = Command.JMCP, payload = Payload.setState(port.id)))
+        val answer = client.readAnswer()
+        return answer
+    }
+
 }

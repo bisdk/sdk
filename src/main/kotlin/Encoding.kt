@@ -68,3 +68,5 @@ fun String.toGWByteArray() = toByteArray()
  * The GW sends data by converting each digit to a byte and these bytes to a combined string (e.g. 0 => 30)
  */
 fun String.toHexByteArray() = chunked(2).map { it.toInt(16).toByte() }.toByteArray()
+
+fun String.toHexInt() = ByteBuffer.wrap(toHexByteArray()).int

@@ -37,7 +37,7 @@ data class Payload(
         fun jmcp(content: String) = Payload(content.toGWByteArray(), PayloadType.JMCP)
         fun getTransition(value: Byte) = Payload(value.toByteArray())  // HM_GET_TRANSITION
         fun getGroupsForUser() = jmcp("{\"CMD\":\"GET_GROUPS\", \"FORUSER\":1}")  // GET_GROUPS
-        fun setState(value: Short) = Payload(value.toByteArray())  // SET_STATE (example "00FF")
+        fun setState(portId: Int, state: Int = 0xFF) = Payload(portId.toByte().toByteArray().plus(state.toByte()))  // SET_STATE (example "00FF")
         fun empty() = Payload(ByteArray(0))
     }
 }
