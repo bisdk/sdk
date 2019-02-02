@@ -16,6 +16,9 @@ data class DiscoveryData(
     fun getGatewayId() = mac.replace(":", "").toUpperCase()
 }
 
+/**
+ * For bisecure gateway discovery, a certain string message is sent over UDP and a result is sent back from the gateway.
+ */
 class Discovery {
 
     fun sendDiscoveryRequest() {

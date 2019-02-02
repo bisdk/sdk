@@ -1,16 +1,6 @@
-enum class Command(val code: Int) {
-    EMPTY(0),
-    ERROR(1),
-    GET_MAC(2),
-    SET_VALUE(3),
-    LOGIN(16),
-    GET_NAME(38);
-
-    companion object {
-        fun valueOf(code: Int) = values().firstOrNull { it.code == code }
-    }
-}
-
+/**
+ * A Package is sent over the socket to the gateway. It contains the command and the payload.
+ */
 data class Package(
         val command: Command,
         val tag: Int = 0,
@@ -57,8 +47,9 @@ data class Package(
             val token = (ba.copyOfRange(idx, idx + Lengths.TOKEN_BYTES).toHexString()).toInt(16)
             idx += Lengths.TOKEN_BYTES
             val commandInt = (ba.copyOfRange(idx, idx + Lengths.COMMAND_BYTES).toHexString()).toInt(16)
+            val responseCommandInt = commandInt xor (1 shl 7)
             idx += Lengths.COMMAND_BYTES
-            val command = Command.valueOf(commandInt)!!
+            val command = Command.valueOf(responseCommandInt)
             return Package(command = command, tag= tag, token = token, payload = Payload(ba.copyOfRange(idx, ba.size - 1)))
         }
     }
@@ -74,7 +65,7 @@ data class Payload(
     }
 
     override fun toString(): String {
-        return toByteArray().joinToString(separator = "") { encodeInt(it.toInt()) }
+        return content.toHexString()
     }
 
     companion object {

@@ -1,3 +1,6 @@
+/**
+ * Certain fixed lengths in the MCP message
+ */
 class Lengths {
     companion object {
         val BYTE_LENGTH = 2

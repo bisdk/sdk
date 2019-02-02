@@ -1,15 +1,20 @@
-
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.net.InetAddress
 import java.net.Socket
 
+/**
+ * The client is responsible for sending and receiving messages to and from the bisecure gateway.
+ *
+ * The sender address used is first "000000000000" but changes as result from login command.
+ */
 class Client(
         private val address: InetAddress,
         private var sender: String,
         private var receiver: String,
+        private var token: String = "",
         private val port: Int = 4000
-): AutoCloseable {
+) : AutoCloseable {
 
     var s: Socket = Socket(address, port)
     var dataOut = DataOutputStream(s.getOutputStream())
@@ -30,9 +35,9 @@ class Client(
     fun sendMessage(message: Package) {
         println("Sending message $message")
         val tc = TransportContainer(sender, receiver, message)
-        val messageBytes = tc.toByteArray().encodeTC()
+        val messageBytes = tc.toByteArray().encodeToGW()
         println("Sending transport container ${tc.toHexString()}")
-        println("Raw: ${tc.toByteArray().encodeTC().toHexString()}")
+        println("Raw: ${tc.toByteArray().encodeToGW().toHexString()}")
         dataOut.write(messageBytes)
         dataOut.flush()
     }
@@ -41,26 +46,28 @@ class Client(
         val ba = readBytes()
         val tc = TransportContainer.from(ba)
         println("Received: $tc")
-//        sender = tc.receiver
-//        receiver = tc.sender
+        if(tc.pack.command == Command.LOGIN) {
+            println("Received answer of LOGIN command => setting senderId and token")
+            sender = tc.receiver
+            token = tc.pack.payload.toByteArray().toHexString()
+        }
         return tc.pack
     }
 
     private fun readBytes(): ByteArray {
         val bytesRead = ArrayList<Byte>()
         println("Reading from socket...")
-        val timeout = 2000
-        val startTime =  System.currentTimeMillis()
-        while (dataIn.available() == 0 && System.currentTimeMillis() < (startTime + timeout)) {
-            Thread.sleep(100)
+        val timeout = 1000
+        val startTime = System.currentTimeMillis()
+        while (System.currentTimeMillis() < (startTime + timeout)) {
+            while (dataIn.available() > 0) {
+                bytesRead.add(dataIn.readUnsignedByte().toByte())
+            }
+            if (dataIn.available() == 0) {
+                Thread.sleep(100)
+            }
         }
-        if(dataIn.available() == 0) {
-            println("No Data read")
-        }
-        while (dataIn.available() > 0 && bytesRead.size < 30) {
-            bytesRead.add(dataIn.readUnsignedByte().toByte())
-        }
-        val ba = bytesRead.toByteArray().decodeTC()
+        val ba = bytesRead.toByteArray().decodeFromGW()
         println("Received from socket: " + ba.toHexString())
         return ba
     }

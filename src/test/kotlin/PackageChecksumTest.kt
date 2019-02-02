@@ -7,6 +7,6 @@ internal class PackageChecksumTest {
     fun calculate() {
         val testPackage = Package(command = Command.LOGIN, payload = Payload.login("thomas", "aaabbbccc"))
         val checksum = PackageChecksum(testPackage).calculate()
-        Assertions.assertThat(encodeInt(checksum)).isEqualToIgnoringCase("2d")
+        Assertions.assertThat(checksum.toByte().toHexString()).isEqualToIgnoringCase("2d")
     }
 }

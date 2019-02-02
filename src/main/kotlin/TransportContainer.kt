@@ -1,3 +1,6 @@
+/**
+ * All messages (Packages) are encapsulated inside a transport container. It defines the sender, receiver and a checksum.
+ */
 class TransportContainer(
         val sender: String,
         val receiver: String,
