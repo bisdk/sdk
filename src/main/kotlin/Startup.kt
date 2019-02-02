@@ -15,12 +15,11 @@ class Startup {
         val discoveryData = future.join()
 
         val client = Client(discoveryData.sourceAddress, "000000000000", discoveryData.getGatewayId())
-        // should read 5410EC03615000000000000600090153BA3FD391BAB9
-        client.sendMessage(Package(Command.GET_NAME))
-        var answer = client.readAnswer()
-        println("Answer: " + answer)
-        client.sendMessage(Package(command = Command.LOGIN, payload = Payload.login("thomas", "aaabbbccc")))
-        answer = client.readAnswer()
-        println("Answer: " + answer)
+        val clientAPI = ClientAPI(client)
+        println("Name: " + clientAPI.getName())
+        println("Login in...")
+        clientAPI.login("thomas", "aaabbbccc")
+        val groups = clientAPI.getGroupsForUser()
+        println("Groups: " + groups)
     }
 }

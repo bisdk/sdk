@@ -21,7 +21,14 @@ class TransportContainer(
             }
             val sender = ba.copyOfRange(0, Lengths.ADDRESS_BYTES).toHexString()
             val receiver = ba.copyOfRange(Lengths.ADDRESS_BYTES, Lengths.ADDRESS_BYTES * 2).toHexString()
-            val pack = Package.from(ba.copyOfRange(Lengths.ADDRESS_BYTES * 2, ba.size - 2))
+            val pack = Package.from(ba.copyOfRange(Lengths.ADDRESS_BYTES * 2, ba.size))
+            return TransportContainer(sender, receiver, pack)
+        }
+
+        fun fromHexString(hex: String): TransportContainer {
+            val sender = hex.substring(0, Lengths.ADDRESS_SIZE)
+            val receiver = hex.substring(Lengths.ADDRESS_SIZE, Lengths.ADDRESS_SIZE * 2)
+            val pack = Package.fromHexString(hex.substring(Lengths.ADDRESS_SIZE * 2, hex.length - 1))
             return TransportContainer(sender, receiver, pack)
         }
     }

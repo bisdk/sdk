@@ -1,3 +1,5 @@
+import java.math.BigInteger
+
 /**
  * A Package is sent over the socket to the gateway. It contains the command and the payload.
  */
@@ -5,13 +7,14 @@ data class Package(
         val command: Command,
         val tag: Int = 0,
         val token: Int = 0,
-        val payload: Payload = Payload.empty()
+        val payload: Payload = Payload.empty(),
+        val isResponse: Boolean = false
 ) {
     fun toByteArray(): ByteArray {
         return getLength().toShort().toByteArray()
                 .plus(tag.toByte().toByteArray())
                 .plus(token.toByteArray())
-                .plus(command.code.toByte().toByteArray()) // TODO if this is a response: set 8-th bit (| 128)
+                .plus(command.code.toByte().toByteArray())
                 .plus(payload.toByteArray())
                 .plus(PackageChecksum(this).calculate().toByte().toByteArray())
     }
@@ -29,11 +32,13 @@ data class Package(
     }
 
     override fun toString(): String {
-        return "command: $command, tag: $tag, token: $token, payload: $payload"
+        return "command: $command, tag: $tag, token: ${token.toByteArray().toHexString()}, payload: $payload (${payload.getContentAsString()}), isResponse=$isResponse"
     }
 
     companion object {
         fun empty() = Package(Command.EMPTY)
+        fun login(username: String, password: String) = Package(command = Command.LOGIN, payload = Payload.login(username, password))
+        fun jmcp(content: String) = Package(command = Command.JMCP, payload = Payload.jmcp(content))
 
         fun from(ba: ByteArray): Package {
             if(ba.size < Lengths.LENGTH_BYTES +  Lengths.TAG_BYTES + Lengths.TOKEN_BYTES + Lengths.COMMAND_BYTES) {
@@ -46,31 +51,21 @@ data class Package(
             idx += Lengths.TAG_BYTES
             val token = (ba.copyOfRange(idx, idx + Lengths.TOKEN_BYTES).toHexString()).toInt(16)
             idx += Lengths.TOKEN_BYTES
-            val commandInt = (ba.copyOfRange(idx, idx + Lengths.COMMAND_BYTES).toHexString()).toInt(16)
-            val responseCommandInt = commandInt xor (1 shl 7)
+            var commandInt = (ba.copyOfRange(idx, idx + Lengths.COMMAND_BYTES).toHexString()).toInt(16)
+            var isResponse = false
+            if(BigInteger.valueOf(commandInt.toLong()).testBit(7)) {
+               commandInt  = commandInt xor (1 shl 7)
+                isResponse = true
+            }
             idx += Lengths.COMMAND_BYTES
-            val command = Command.valueOf(responseCommandInt)
-            return Package(command = command, tag= tag, token = token, payload = Payload(ba.copyOfRange(idx, ba.size - 1)))
+            val command = Command.valueOf(commandInt)
+            return Package(command, tag, token, Payload(ba.copyOfRange(idx, ba.size - 2)), isResponse)
+        }
+
+        fun fromHexString(hex: String): Package {
+            return from(hex.toHexByteArray())
         }
     }
 
-}
-
-data class Payload(
-        private val content: ByteArray
-) {
-
-    fun toByteArray(): ByteArray {
-        return content
-    }
-
-    override fun toString(): String {
-        return content.toHexString()
-    }
-
-    companion object {
-        fun login(username: String, password: String) = Payload(username.length.toByte().toByteArray().plus(username.toByteArray()) + password.toByteArray())
-        fun empty() = Payload(ByteArray(0))
-    }
 }
 
