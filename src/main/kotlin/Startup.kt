@@ -15,13 +15,15 @@ class Startup {
         val discoveryData = future.join()
 
         val client = Client(discoveryData.sourceAddress, "000000000000", discoveryData.getGatewayId())
-        val clientAPI = ClientAPI(client)
+        val clientAPI = ClientAPI(client, "thomas", "aaabbbccc")
         println("Name: " + clientAPI.getName())
         println("Login in...")
-        clientAPI.login("thomas", "aaabbbccc")
+        clientAPI.login()
+        val state = clientAPI.getState()
+        println("State: $state")
         val groups = clientAPI.getGroupsForUser()
-        println("Groups: " + groups)
+        println("Groups: $groups")
         val transition = clientAPI.getTransition(groups[0].ports[0])
-        clientAPI.setState(groups[0].ports[0])
+//        clientAPI.setState(groups[0].ports[0])
     }
 }

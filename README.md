@@ -52,15 +52,9 @@ The whole hex value array is converted to a string (as human readable hex string
 The get name request is the first request made from APP to GW.
 
 #### Authentication
-The request fromthe app to the gateway for authentication seems to have the following format:
-`{appId: 6byte}{gatewayId: 6byte}{bodyLength:2 byte}{SessionId: 0000000000}{Login Command 10}{userNameLength: 1byte}{userNameHex}{passwordHex}{checksums: 2byte}`
+Send a LOGIN command and receive the token (session id) as response payload.
 
-Example (I x-ed out my MAC :-):
-`000000000000XXXXXXXXXXXX00190000000000100674686F6D61736161616262626363632DF0`
-Username is `thomas`and password is `aaabbbccc`
-
-The gateway response with some kind of session:
-`000000000006XXXXXXXXXXXX000900F4443564300A78`where `F4443564`seems to be the session id, because it is part of every sub sequent request. The App Address is now set to `000000000006`.
+It seems that only one client can be logged in into the GW. So if your app is also logged in it will be logged out. Or the App will log out your session.
 
 #### Get Transition
 Command GET_TRANSITION => Results in door state
