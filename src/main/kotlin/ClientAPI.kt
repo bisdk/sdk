@@ -33,6 +33,15 @@ class ClientAPI(private val client: Client,
         return mapper.readValue(json)
     }
 
+    fun getGroups(): List<Group> {
+        client.sendMessage(Package(command = Command.JMCP, payload = Payload.getGroupsForUser()))
+        val answer = client.readAnswer()
+        val json = answer.payload.getContentAsString()
+        val mapper = ObjectMapper()
+        mapper.registerModules(KotlinModule(), ParameterNamesModule())
+        return mapper.readValue(json)
+    }
+
     fun getGroupsForUser(): List<Group> {
         client.sendMessage(Package(command = Command.JMCP, payload = Payload.getGroupsForUser()))
         val answer = client.readAnswer()

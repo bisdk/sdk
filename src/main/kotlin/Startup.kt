@@ -21,7 +21,7 @@ class Startup {
         clientAPI.login()
         val state = clientAPI.getState()
         println("State: $state")
-        val groups = clientAPI.getGroupsForUser()
+        val groups = clientAPI.getGroups()
         println("Groups: $groups")
         val transition = clientAPI.getTransition(groups[0].ports[0])
 //        clientAPI.setState(groups[0].ports[0])
