@@ -7,7 +7,8 @@ class Command(val code: Int, val name: String = "UNKNOWN") {
 
     companion object {
         fun valueOf(code: Int) = values.firstOrNull { it.code == code } ?: Command(code)
-        val EMPTY = Command(0, "EMPTY")
+        val EMPTY = Command(-1, "EMPTY")
+        val PING = Command(0, "PING")
         val ERROR = Command(1, "ERROR")
         val GET_MAC = Command(2, "GET_MAC")
         val SET_VALUE = Command(3, "SET_VALUE")
@@ -18,7 +19,7 @@ class Command(val code: Int, val name: String = "UNKNOWN") {
         val SET_STATE = Command(51, "SET_STATE")
         val HM_GET_TRANSITION = Command(112, "HM_GET_TRANSITION")
 
-        val values = arrayListOf(EMPTY, ERROR, GET_MAC, SET_VALUE, JMCP, LOGIN, LOGOUT, GET_NAME, SET_STATE, HM_GET_TRANSITION)
+        val values = arrayListOf(EMPTY, PING, ERROR, GET_MAC, SET_VALUE, JMCP, LOGIN, LOGOUT, GET_NAME, SET_STATE, HM_GET_TRANSITION)
     }
 
     override fun toString(): String {

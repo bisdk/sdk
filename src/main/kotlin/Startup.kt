@@ -17,6 +17,7 @@ class Startup {
         val client = Client(discoveryData.sourceAddress, "000000000000", discoveryData.getGatewayId())
         val clientAPI = ClientAPI(client, "thomas", "aaabbbccc")
         println("Name: " + clientAPI.getName())
+        println("Ping: " + clientAPI.ping())
         println("Login in...")
         clientAPI.login()
         val state = clientAPI.getState()

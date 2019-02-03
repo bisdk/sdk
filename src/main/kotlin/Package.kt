@@ -32,6 +32,9 @@ data class Package(
     }
 
     override fun toString(): String {
+        if(command == Command.ERROR) {
+            return "command: $command, tag: $tag, token: $token, error: ${Error.from(payload.toByteArray()[0].toInt())}, isResponse=$isResponse"
+        }
         if(command == Command.HM_GET_TRANSITION && isResponse) {
             return "command: $command, tag: $tag, token: $token, payload: ${Transition.from(payload.toByteArray())}, isResponse=$isResponse"
         }
