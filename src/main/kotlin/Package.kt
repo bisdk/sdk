@@ -38,7 +38,7 @@ data class Package(
         if(command == Command.HM_GET_TRANSITION && isResponse) {
             return "command: $command, tag: $tag, token: $token, payload: ${Transition.from(payload.toByteArray())}, isResponse=$isResponse"
         }
-        return "command: $command, tag: $tag, token: $token, payload: $payload (${payload.getContentAsString()}), isResponse=$isResponse"
+        return "command: $command, tag: $tag, token: $token, payload: $payload, isResponse=$isResponse"
     }
 
     companion object {

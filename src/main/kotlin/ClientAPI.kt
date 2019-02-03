@@ -22,11 +22,17 @@ class ClientAPI(private val client: Client,
         val maxRetries = 5
         var retries = 0
         do {
+            client.token = "00000000"  // reset the token before login
             client.sendMessage(Package(command = Command.LOGIN, payload = Payload.login(userName, password)))
             val answer = client.readAnswer()
             retries++
             Thread.sleep(100)
         } while (retries < maxRetries && answer.command != Command.LOGIN)
+    }
+
+    fun logout() {
+        client.sendMessage(Package(command = Command.LOGOUT, payload = Payload.empty()))
+        val answer = client.readAnswer()
     }
 
     /**
@@ -87,6 +93,7 @@ class ClientAPI(private val client: Client,
             Thread.sleep(100)
             if(retries > 2) {
                 // If we get an error more than one time, it could be that we got logged out => login and try again
+                logout()
                 login()
             }
         } while (retries < maxRetries && answer.command != Command.HM_GET_TRANSITION)
