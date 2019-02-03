@@ -12,8 +12,13 @@ class ClientAPI(val client: Client) {
     }
 
     fun login(userName: String, password: String) {
-        client.sendMessage(Package(command = Command.LOGIN, payload = Payload.login(userName, password)))
-        client.readAnswer()
+        val maxRetries = 3
+        var retries = 0
+        do {
+            client.sendMessage(Package(command = Command.LOGIN, payload = Payload.login(userName, password)))
+            val answer = client.readAnswer()
+            retries++
+        } while (retries < maxRetries && answer.command != Command.LOGIN)
     }
 
     fun getGroupsForUser(): List<Group> {
@@ -27,9 +32,15 @@ class ClientAPI(val client: Client) {
     }
 
     fun setState(port: Port): Package {
-        client.sendMessage(Package(command = Command.JMCP, payload = Payload.setState(port.id)))
+        client.sendMessage(Package(command = Command.SET_STATE, payload = Payload.setState(port.id)))
         val answer = client.readAnswer()
         return answer
+    }
+
+    fun getTransition(port: Port): Transition {
+        client.sendMessage(Package(command = Command.HM_GET_TRANSITION, payload = Payload.getTransition(port.id)))
+        val answer = client.readAnswer()
+        return Transition.from(answer.payload.toByteArray())
     }
 
 }

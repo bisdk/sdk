@@ -38,7 +38,7 @@ class Client(
         val tc = TransportContainer(sender, receiver, pack)
         val messageBytes = tc.toByteArray().encodeToGW()
         println("Sending transport container ${tc.toHexString()}")
-        println("Raw: ${tc.toByteArray().encodeToGW().toHexString()}")
+//        println("Raw: ${tc.toByteArray().encodeToGW().toHexString()}")
         dataOut.write(messageBytes)
         dataOut.flush()
     }
@@ -61,7 +61,7 @@ class Client(
 
     private fun readBytes(): ByteArray {
         val bytesRead = ArrayList<Byte>()
-        println("Reading from socket...")
+//        println("Reading from socket...")
         val timeout = 1000
         val startTime = System.currentTimeMillis()
         while (System.currentTimeMillis() < (startTime + timeout)) {
