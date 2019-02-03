@@ -34,7 +34,7 @@ class ClientAPI(private val client: Client,
     }
 
     fun getGroups(): List<Group> {
-        client.sendMessage(Package(command = Command.JMCP, payload = Payload.getGroupsForUser()))
+        client.sendMessage(Package(command = Command.JMCP, payload = Payload.getGroups()))
         val answer = client.readAnswer()
         val json = answer.payload.getContentAsString()
         val mapper = ObjectMapper()
