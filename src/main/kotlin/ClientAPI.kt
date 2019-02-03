@@ -25,6 +25,9 @@ class ClientAPI(private val client: Client,
             client.token = "00000000"  // reset the token before login
             client.sendMessage(Package(command = Command.LOGIN, payload = Payload.login(userName, password)))
             val answer = client.readAnswer()
+            if(answer.command == Command.LOGOUT) {
+                logout()
+            }
             retries++
             Thread.sleep(100)
         } while (retries < maxRetries && answer.command != Command.LOGIN)

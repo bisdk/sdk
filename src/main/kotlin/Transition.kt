@@ -21,6 +21,24 @@ data class Transition(
         val ignoreRetries: Boolean
 ) {
 
+    fun isDriving() = driveTime != 0 || hcp.driving
+
+    fun drivingDirection(): DriveDirection? = if (driveTime == 0 && hcp.driving) {
+        if (hcp.drivingToClose) {
+            DriveDirection.TO_CLOSE
+        } else {
+            DriveDirection.TO_OPEN
+        }
+    } else if (driveTime > 0) {
+        if (desiredStateInPercent > stateInPercent) {
+            DriveDirection.TO_OPEN
+        } else {
+            DriveDirection.TO_CLOSE
+        }
+    } else {
+        null
+    }
+
     companion object {
         fun from(ba: ByteArray): Transition {
             val byte3 = BitSet.valueOf(ba[2].toByteArray())
@@ -62,4 +80,8 @@ data class HCP(
             return HCP(bs.get(0), bs.get(1), bs.get(2), bs.get(3), bs.get(4), bs.get(5), bs.get(6), bs.get(7), bs.get(8), bs.get(9), bs.get(10))
         }
     }
+}
+
+enum class DriveDirection {
+    TO_CLOSE, TO_OPEN
 }

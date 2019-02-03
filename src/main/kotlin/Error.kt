@@ -21,6 +21,6 @@ enum class Error(val code: Int) {
     ADAPTER_BUSY(19);
 
     companion object {
-        fun from(code: Int): Error? = Error.values().filter { it.code == code }.firstOrNull()
+        fun from(code: Int): Error? = values().firstOrNull { it.code == code }
     }
 }
