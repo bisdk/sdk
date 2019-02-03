@@ -63,7 +63,12 @@ class ClientAPI(private val client: Client,
         do {
             client.sendMessage(Package(command = Command.HM_GET_TRANSITION, payload = Payload.getTransition(port.id)))
             answer = client.readAnswer()
+            retries++
             Thread.sleep(100)
+            if(retries > 2) {
+                // If we get an error more than one time, it could be that we got logged out => login and try again
+                login()
+            }
         } while (retries < maxRetries && answer.command != Command.HM_GET_TRANSITION)
         return Transition.from(answer.payload.toByteArray())
     }
