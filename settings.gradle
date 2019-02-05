@@ -1,0 +1,86 @@
+includeModules()
+
+def includeModules() {
+    List<File> moduleFiles = getProjectFiles()
+    Properties localProperties = getLocalProperties()
+    List<File> includedModules = getIncludedModules(localProperties, moduleFiles)
+    
+    def includerDelegate = new ProjectIncluderDelegate(settings)
+
+    moduleFiles.each { file ->
+        includerDelegate.include = includedModules.contains(file)
+        includerDelegate.previousProject = ''
+        apply from: file, to: includerDelegate
+    }
+
+}
+
+class ProjectIncluderDelegate {
+    @Delegate
+    Settings settings
+    boolean include
+    String previousProject = ''
+    Set<String> included = new TreeSet()
+    Set<String> all = new TreeSet()
+
+    ProjectIncluderDelegate(def settings) {
+        this.settings = settings
+    }
+
+    void include(String[] projects) {
+        String project = getSingleProject(projects)
+        trackAndMaybeInclude(project)
+    }
+
+    private void trackAndMaybeInclude(String project) {
+        all.add(project)
+        if (include) {
+            included.add(project)
+            settings.include(project)
+        }
+    }
+
+    private static String getSingleProject(String[] projects) {
+        if (projects.length > 1) {
+            throw new GradleException('Expecting only one project per invocation')
+        }
+        return projects[0]
+    }
+}
+
+List<File> getProjectFiles() {
+    return settingsDir.listFiles((FilenameFilter) { File file, String s ->
+        return s.startsWith('projects-') && s.endsWith(".gradle")
+    })
+}
+
+Properties getLocalProperties() {
+    def localProps = new Properties()
+    def localPropsFile = new File(settingsDir, 'local.properties')
+    if (localPropsFile.canRead()) {
+        localProps.load(new FileInputStream(localPropsFile))
+    }
+    if(localProps.getProperty('includeApps') == null) {
+        localProps.setProperty("includeApps", "sdk")
+    }
+
+    return localProps
+}
+
+static List<File> getIncludedModules(Properties localProps, List<File> projectFiles) {
+    String includedAppsProperty = localProps.getProperty('includeApps')
+    List<String> includedModuleNames = getIncludedModuleNames(includedAppsProperty)
+    List<File> includedProjectFiles = projectFiles.findAll { includedModuleNames.contains(it.name) }
+    return includedProjectFiles
+}
+
+static List<String> getIncludedModuleNames(String includedModule) {
+    List<String> moduleNamesNames = getModulesProjectFiles(includedModule)
+    return moduleNamesNames
+}
+
+static List<String> getModulesProjectFiles(String property) {
+    return property.split(',').collect { it.trim() }.findAll { !it.isEmpty() }.collect {
+        "projects-${it}.gradle".toString()
+    }
+}
