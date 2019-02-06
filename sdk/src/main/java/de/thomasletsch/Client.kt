@@ -84,4 +84,8 @@ class Client(
         dataIn.close()
         s.close()
     }
+
+    override fun toString(): String {
+        return "Client(address=$address, sender='$sender', receiver='$receiver', token='$token', port=$port, s=$s, dataOut=$dataOut, dataIn=$dataIn)"
+    }
 }
