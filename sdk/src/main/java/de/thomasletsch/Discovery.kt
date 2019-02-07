@@ -37,7 +37,7 @@ class Discovery {
         val receiveData = ByteArray(1024)
         val receivePacket = DatagramPacket(receiveData, receiveData.size)
         println("Starting UDP Server on port ${serverSocket.localPort}")
-        return CompletableFuture.supplyAsync() {
+        return CompletableFuture.supplyAsync {
             serverSocket.receive(receivePacket)
             val sentence = String(receivePacket.data.copyOf(receivePacket.length))
 //            println("RECEIVED: $sentence")
@@ -47,9 +47,22 @@ class Discovery {
             val doc = dBuilder.parse(xmlInput)
             val element = doc.documentElement
 //            println("Element name: ${element.tagName}")
-            val data = DiscoveryData(element.getAttribute("mac"), receivePacket.address, element.getAttribute("swVersion"), element.getAttribute("hwVersion"), element.getAttribute("protocol"))
+            val data = DiscoveryData(
+                    element.getAttribute("mac"),
+                    receivePacket.address,
+                    element.getAttribute("swVersion"),
+                    element.getAttribute("hwVersion"),
+                    element.getAttribute("protocol")
+            )
             println("Gateway data: $data")
             data
         }
     }
+
+    fun start(): CompletableFuture<DiscoveryData> {
+        val startServer = startServer()
+        sendDiscoveryRequest()
+        return startServer
+    }
+
 }

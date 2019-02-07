@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<account-authenticator xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accountPreferences="@xml/auth_pref"
+    android:accountType="com.hormann.auth"
+    android:icon="@drawable/baseline_home_black_48"
+    android:label="@string/label"
+    android:smallIcon="@drawable/baseline_home_black_24" />

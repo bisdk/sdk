@@ -1,4 +1,4 @@
-package se.warting.myapplication
+package com.hormann.app
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
