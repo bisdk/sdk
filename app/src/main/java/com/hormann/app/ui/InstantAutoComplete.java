@@ -1,4 +1,4 @@
-package com.hormann.app;
+package com.hormann.app.ui;
 
 import android.content.Context;
 import android.graphics.Rect;

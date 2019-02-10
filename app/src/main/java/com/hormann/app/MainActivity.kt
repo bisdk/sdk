@@ -1,50 +1,31 @@
 package com.hormann.app
 
+import android.accounts.AccountManager
 import android.os.Bundle
-import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
-import android.widget.Spinner
+import android.widget.Button
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
-import androidx.work.Constraints
-import androidx.work.NetworkType
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
-import com.hormann.app.discover.DiscoverWorker
+import com.hormann.app.account.HormannAccountAuthenticator
 
 class MainActivity : AppCompatActivity() {
-
-    private lateinit var gatewaysViewModel: GatewaysViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val autoCompleteTextView = findViewById<AutoCompleteTextView>(R.id.gateways)
-        val storeListAdapter = StoreListAdapter(this, this)
-        autoCompleteTextView.setAdapter(storeListAdapter)
-
-        val constraints = Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED)
-                .build()
-
-        WorkManager.getInstance().enqueue(
-                OneTimeWorkRequestBuilder<DiscoverWorker>().setConstraints(constraints).build()
-        )
+        findViewById<Button>(R.id.login).setOnClickListener {
+            AccountManager.get(this).addAccount(HormannAccountAuthenticator.ACCOUNT_TYPE, HormannAccountAuthenticator.TOKEN_TYPE_GATEWAY, null, null, this, null, null)
+        }
     }
 
-
-    private fun initData(autoCompleteTextView: AutoCompleteTextView) {
-
-        val packageTypesAdapter = ArrayAdapter<Any>(this@MainActivity, android.R.layout.simple_spinner_item)
-
-        gatewaysViewModel.allPackageTypes.observe(this, Observer { packageTypes ->
-            packageTypes?.forEach {
-                packageTypesAdapter.add("${it.host}:${it.port}(${it.receiver})")
-            }
-        })
-
-        findViewById<Spinner>(R.id.gateways).adapter = packageTypesAdapter
-
+    override fun onResume() {
+        super.onResume()
+        val accountManager = AccountManager.get(this)
+        val accounts = accountManager.getAccountsByType(HormannAccountAuthenticator.ACCOUNT_TYPE)
+        if (accounts.isEmpty()) {
+            findViewById<TextView>(R.id.welcome).text = getString(R.string.please_login)
+        } else {
+            findViewById<TextView>(R.id.welcome).text = getString(R.string.welcome, accounts[0].name)
+        }
     }
 }

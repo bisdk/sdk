@@ -104,5 +104,7 @@ class HormannAccountAuthenticator(private val context: Context) : AbstractAccoun
         const val PASSWORD = "password"
         const val ADD_ACCOUNT = "addAccount"
         const val TOKEN_TYPE = "tokenType"
+        const val ACCOUNT_TYPE: String = "com.hormann.auth"
+        const val TOKEN_TYPE_GATEWAY: String = "com.hormann.token.gateway"
     }
 }

@@ -1,67 +1,103 @@
 package com.hormann.app.account
 
 import android.accounts.Account
-import android.accounts.AccountAuthenticatorActivity
 import android.accounts.AccountManager
 import android.content.Intent
-import android.os.AsyncTask
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import androidx.work.*
 import com.hormann.app.R
+import com.hormann.app.StoreListAdapter
+import com.hormann.app.discover.DiscoverWorker
 
-class HormannAccountActivity : AccountAuthenticatorActivity() {
 
-    companion object {
-        private const val REQ_REGISTER = 11
-    }
+class HormannAccountActivity : AppCompatAccountAuthenticatorActivity() {
 
     private var accountManager: AccountManager? = null
 
     override fun onCreate(icicle: Bundle?) {
         super.onCreate(icicle)
-        setContentView(R.layout.account_login)
-        findViewById<Button>(R.id.login).setOnClickListener { login() }
+        setContentView(R.layout.activity_login)
+
+        val autoCompleteTextView = findViewById<AutoCompleteTextView>(R.id.gateway)
+        val storeListAdapter = StoreListAdapter(this, this)
+        autoCompleteTextView.setAdapter(storeListAdapter)
+
+        val constraints = Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build()
+
+        WorkManager.getInstance().enqueue(
+                OneTimeWorkRequestBuilder<DiscoverWorker>().setConstraints(constraints).build()
+        )
+
+
+        findViewById<Button>(R.id.login_in_button).setOnClickListener {
+            val host = (findViewById<View>(R.id.gateway) as EditText).text.toString()
+            val userId = (findViewById<View>(R.id.username) as EditText).text.toString()
+            val passWd = (findViewById<View>(R.id.password) as EditText).text.toString()
+
+            login(host, userId, passWd)
+        }
         accountManager = AccountManager.get(baseContext)
     }
 
-    fun createAccount(view: View) {
-        val intent = Intent(baseContext, HormannCreateAccountActivity::class.java)
-        intent.putExtras(getIntent().extras!!)
-        startActivityForResult(intent, REQ_REGISTER)
-    }
+    private fun login(host: String, userId: String, passWord: String) {
+        findViewById<ProgressBar>(R.id.login_progress).visibility = View.VISIBLE
+        findViewById<ScrollView>(R.id.login_form).visibility = View.GONE
+        val constraints = Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build()
 
-    private fun login() {
-        val userId = (findViewById<View>(R.id.user) as EditText).text.toString()
-        val passWd = (findViewById<View>(R.id.password) as EditText).text.toString()
+        val data = Data.Builder()
+                .putString(LoginWorker.KEY_HOST, host)
+                .putString(LoginWorker.KEY_USER_ID, userId)
+                .putString(LoginWorker.KEY_USER_PASSWORD, passWord)
+                .build()
 
-        val accountType = intent.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE)
+        val work = OneTimeWorkRequestBuilder<LoginWorker>().setInputData(data).setConstraints(constraints).build()
+        WorkManager.getInstance().enqueue(work)
 
-        object : AsyncTask<Void, Void, Intent>() {
-            override fun doInBackground(vararg params: Void): Intent {
-                val data = Bundle()
 
-                val authToken = HormannAccountRegLoginHelper.authenticate(userId, passWd)
-                val tokenType = HormannAccountRegLoginHelper.getTokenType(userId)
+        WorkManager.getInstance().getWorkInfoByIdLiveData(work.id)
+                .observe(this, Observer { info ->
+                    if (info != null && info.state.isFinished) {
+                        val isSuccess = info.outputData.getBoolean(LoginWorker.KEY_RESULT, false)
+                        if (isSuccess) {
 
-                data.putString(AccountManager.KEY_ACCOUNT_NAME, userId)
-                data.putString(AccountManager.KEY_ACCOUNT_TYPE, accountType)
-                data.putString(HormannAccountAuthenticator.TOKEN_TYPE, tokenType)
-                data.putString(AccountManager.KEY_AUTHTOKEN, authToken)
-                data.putString(HormannAccountAuthenticator.PASSWORD, passWd)
+                            val accountType = intent.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE)
 
-                val result = Intent()
-                result.putExtras(data)
+                            val loginData = Bundle()
 
-                return result
-            }
+                            val authToken = HormannAccountRegLoginHelper.authenticate(userId, passWord)
+                            val tokenType = HormannAccountRegLoginHelper.getTokenType(userId)
 
-            override fun onPostExecute(intent: Intent) {
-                setLoginResult(intent)
-            }
-        }.execute()
+                            loginData.putString(AccountManager.KEY_ACCOUNT_NAME, userId)
+                            loginData.putString(AccountManager.KEY_ACCOUNT_TYPE, accountType)
+                            loginData.putString(HormannAccountAuthenticator.TOKEN_TYPE, tokenType)
+                            loginData.putString(AccountManager.KEY_AUTHTOKEN, authToken)
+                            loginData.putString(HormannAccountAuthenticator.PASSWORD, passWord)
+
+                            val result = Intent()
+                            result.putExtras(loginData)
+
+                            setLoginResult(result)
+
+                            Toast.makeText(this@HormannAccountActivity, "inloggad", Toast.LENGTH_SHORT).show()
+                        } else {
+                            findViewById<ProgressBar>(R.id.login_progress).visibility = View.GONE
+                            findViewById<ScrollView>(R.id.login_form).visibility = View.VISIBLE
+                            Toast.makeText(this@HormannAccountActivity, "EJ inloggad", Toast.LENGTH_SHORT).show()
+                        }
+
+
+                    }
+                })
+
+
     }
 
     private fun setLoginResult(intent: Intent) {
@@ -85,12 +121,5 @@ class HormannAccountActivity : AccountAuthenticatorActivity() {
         setResult(AppCompatActivity.RESULT_OK, intent)
 
         finish()
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
-        if (resultCode == AppCompatActivity.RESULT_OK && requestCode == REQ_REGISTER) {
-            setLoginResult(data)
-        } else
-            super.onActivityResult(requestCode, resultCode, data)
     }
 }
