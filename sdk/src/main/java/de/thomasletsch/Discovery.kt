@@ -5,6 +5,7 @@ import java.io.StringReader
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
+import java.net.InetSocketAddress
 import java.util.concurrent.CompletableFuture
 import javax.xml.parsers.DocumentBuilderFactory
 
@@ -33,7 +34,9 @@ class Discovery {
     }
 
     fun startServer(): CompletableFuture<DiscoveryData> {
-        val serverSocket = DatagramSocket(4002)
+        val serverSocket = DatagramSocket(null)
+        serverSocket.reuseAddress = true
+        serverSocket.bind(InetSocketAddress(4002))
         val receiveData = ByteArray(1024)
         val receivePacket = DatagramPacket(receiveData, receiveData.size)
         println("Starting UDP Server on port ${serverSocket.localPort}")
