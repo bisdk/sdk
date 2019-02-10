@@ -3,13 +3,13 @@ package com.hormann.app.account
 import android.accounts.Account
 import android.accounts.AccountAuthenticatorActivity
 import android.accounts.AccountManager
-import android.app.Activity
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import androidx.appcompat.app.AppCompatActivity
 import com.hormann.app.R
 
 class HormannAccountActivity : AccountAuthenticatorActivity() {
@@ -82,13 +82,13 @@ class HormannAccountActivity : AccountAuthenticatorActivity() {
         }
 
         setAccountAuthenticatorResult(intent.extras)
-        setResult(Activity.RESULT_OK, intent)
+        setResult(AppCompatActivity.RESULT_OK, intent)
 
         finish()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
-        if (resultCode == Activity.RESULT_OK && requestCode == REQ_REGISTER) {
+        if (resultCode == AppCompatActivity.RESULT_OK && requestCode == REQ_REGISTER) {
             setLoginResult(data)
         } else
             super.onActivityResult(requestCode, resultCode, data)

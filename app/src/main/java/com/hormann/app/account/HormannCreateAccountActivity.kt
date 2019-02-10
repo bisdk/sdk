@@ -1,13 +1,11 @@
 package com.hormann.app.account
 
 import android.accounts.AccountManager
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.EditText
 import android.widget.TextView
-
 import androidx.appcompat.app.AppCompatActivity
 import com.hormann.app.R
 
@@ -49,7 +47,7 @@ class HormannCreateAccountActivity : AppCompatActivity() {
         val result = Intent()
         result.putExtras(data)
 
-        setResult(Activity.RESULT_OK, result)
+        setResult(AppCompatActivity.RESULT_OK, result)
         finish()
     }
 }

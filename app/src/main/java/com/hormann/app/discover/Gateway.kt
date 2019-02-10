@@ -12,4 +12,8 @@ data class Gateway(
 ) {
     @PrimaryKey(autoGenerate = true)
     var uid: Int = 0
+
+    override fun toString(): String {
+        return "$host:$port"
+    }
 }

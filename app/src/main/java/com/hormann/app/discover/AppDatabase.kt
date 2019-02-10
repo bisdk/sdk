@@ -13,7 +13,6 @@ abstract class AppDatabase : RoomDatabase() {
         Room.databaseBuilder(
                 it.applicationContext,
                 AppDatabase::class.java, "Hormann.db"
-        )
-                .build()
+        ).build()
     })
 }
