@@ -52,7 +52,7 @@ class HormannAccountAuthenticator(private val context: Context) : AbstractAccoun
         if (TextUtils.isEmpty(authToken)) {
             val password = accountManager.getPassword(account)
             if (password != null) {
-                authToken = HormannAccountRegLoginHelper.authenticate(account.name, password)
+                authToken = "xxx"
             }
         }
 

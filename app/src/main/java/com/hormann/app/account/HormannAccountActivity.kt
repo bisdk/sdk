@@ -72,8 +72,8 @@ class HormannAccountActivity : AppCompatAccountAuthenticatorActivity() {
 
                             val loginData = Bundle()
 
-                            val authToken = HormannAccountRegLoginHelper.authenticate(userId, passWord)
-                            val tokenType = HormannAccountRegLoginHelper.getTokenType(userId)
+                            val authToken = "xxx"
+                            val tokenType = "xxx"
 
                             loginData.putString(AccountManager.KEY_ACCOUNT_NAME, userId)
                             loginData.putString(AccountManager.KEY_ACCOUNT_TYPE, accountType)
@@ -86,11 +86,11 @@ class HormannAccountActivity : AppCompatAccountAuthenticatorActivity() {
 
                             setLoginResult(result)
 
-                            Toast.makeText(this@HormannAccountActivity, "inloggad", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@HormannAccountActivity, getString(R.string.logged_in), Toast.LENGTH_SHORT).show()
                         } else {
                             findViewById<ProgressBar>(R.id.login_progress).visibility = View.GONE
                             findViewById<ScrollView>(R.id.login_form).visibility = View.VISIBLE
-                            Toast.makeText(this@HormannAccountActivity, "EJ inloggad", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@HormannAccountActivity, getString(R.string.not_logged_in), Toast.LENGTH_SHORT).show()
                         }
 
 

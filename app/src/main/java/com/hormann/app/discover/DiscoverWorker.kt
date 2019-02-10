@@ -30,7 +30,7 @@ class DiscoverWorker(context: Context, params: WorkerParameters) : Worker(contex
                 userDao.insertAll(Gateway(it.getGatewayId(), it.sourceAddress.hostAddress, 4000))
             }.get(3, TimeUnit.SECONDS)
         } catch (e: TimeoutException) {
-            Log.e("Discovery", "timout", e)
+            Log.e("Discovery", "timeout", e)
         }
 
 
