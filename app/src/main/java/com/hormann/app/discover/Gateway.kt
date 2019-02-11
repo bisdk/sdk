@@ -6,14 +6,13 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class Gateway(
-        @ColumnInfo(name = "receiver") var receiver: String?,
-        @ColumnInfo(name = "host") var host: String?,
-        @ColumnInfo(name = "port") var port: Int
+        @PrimaryKey var mac: String,
+        @ColumnInfo(name = "hwVersion") var hwVersion: String?,
+        @ColumnInfo(name = "protocol") var protocol: String?,
+        @ColumnInfo(name = "sourceAddress") var sourceAddress: String?,
+        @ColumnInfo(name = "swVersion") var swVersion: String?
 ) {
-    @PrimaryKey(autoGenerate = true)
-    var uid: Int = 0
-
     override fun toString(): String {
-        return "$host:$port"
+        return "$sourceAddress ($mac)"
     }
 }

@@ -30,6 +30,9 @@ class StoreListAdapter(owner: LifecycleOwner, context: Context) : ArrayAdapter<G
 
     }
 
+    override fun getItemId(position: Int): Long {
+        return getItem(position)?.mac.hashCode().toLong()
+    }
 
     override fun getView(position: Int, view: View?, parent: ViewGroup): View {
         var shadowView = view
@@ -40,10 +43,10 @@ class StoreListAdapter(owner: LifecycleOwner, context: Context) : ArrayAdapter<G
         }
 
         val strName = shadowView!!.findViewById<TextView>(R.id.store)
-        strName.text = getItem(position)?.host
+        strName.text = getItem(position)?.sourceAddress
 
         val couponCount = shadowView.findViewById<TextView>(R.id.coupon)
-        couponCount.text = getItem(position)?.port.toString()
+        couponCount.text = getItem(position)?.mac
         return shadowView
     }
 

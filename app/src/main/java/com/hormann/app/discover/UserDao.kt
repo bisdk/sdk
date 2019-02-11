@@ -11,10 +11,7 @@ interface UserDao {
     @Query("SELECT * FROM gateway")
     fun getAll(): LiveData<List<Gateway>>
 
-    @Query("SELECT * FROM gateway WHERE host like :search")
-    fun search(search: String): List<Gateway>
-
-    @Query("SELECT * FROM gateway WHERE uid IN (:gatewayIds)")
+    @Query("SELECT * FROM gateway WHERE mac IN (:gatewayIds)")
     fun loadAllByIds(gatewayIds: IntArray): List<Gateway>
 
     @Insert

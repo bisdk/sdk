@@ -19,20 +19,23 @@ class DiscoverWorker(context: Context, params: WorkerParameters) : Worker(contex
 
         userDao.clear()
 
-        if (BuildConfig.DEBUG) {
-            // Debugger cannot scan network, manually add gateways here
-            userDao.insertAll(Gateway("5410ECD7ECD6", "10.0.1.106", 4000))
-        }
+        var found = false
 
         val discovery = Discovery()
         try {
             discovery.start().thenApplyAsync {
-                userDao.insertAll(Gateway(it.getGatewayId(), it.sourceAddress.hostAddress, 4000))
+                found = true
+                userDao.insertAll(Gateway(it.getGatewayId(), it.hwVersion, it.protocol, it.sourceAddress.hostAddress, it.swVersion))
             }.get(3, TimeUnit.SECONDS)
         } catch (e: TimeoutException) {
             Log.e("Discovery", "timeout", e)
         }
 
+
+        if (BuildConfig.DEBUG && !found) {
+            // Debugger cannot scan network, manually add gateways here
+            userDao.insertAll(Gateway("5410ECD7ECD6", "1.0.0", "MCP V3.0", "10.0.1.106", "2.5.0"))
+        }
 
         return Result.success()
     }
