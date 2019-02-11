@@ -40,7 +40,23 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/prompt_host"
-                    android:inputType="textEmailAddress"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:singleLine="true" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.hormann.app.ui.InstantAutoComplete
+                    android:id="@+id/mac"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/mac_adress"
+                    android:inputType="text"
                     android:maxLines="1"
                     android:singleLine="true" />
 

@@ -5,8 +5,10 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule
 
-class ClientAPI(private val client: Client,
-                private val userName: String, private val password: String) {
+class ClientAPI(
+    private val client: Client,
+    private val userName: String, private val password: String
+) {
 
     fun getName(): String {
         client.sendMessage(Package(Command.GET_NAME))
@@ -18,7 +20,7 @@ class ClientAPI(private val client: Client,
         return client.readAnswer().payload.getContentAsString()
     }
 
-    fun login() {
+    fun login(): Boolean {
         // We retry login because sometime we get a LOGOUT when another client (the android app) is also logged in.
         // It seems that only one client can be logged in at the same time.
         val maxRetries = 5
@@ -27,12 +29,15 @@ class ClientAPI(private val client: Client,
             client.token = "00000000"  // reset the token before login
             client.sendMessage(Package(command = Command.LOGIN, payload = Payload.login(userName, password)))
             val answer = client.readAnswer()
-            if(answer.command == Command.LOGOUT) {
+            if (answer.command == Command.LOGIN) {
+                return true
+            } else if (answer.command == Command.LOGOUT) {
                 logout()
             }
             retries++
             Thread.sleep(100)
         } while (retries < maxRetries && answer.command != Command.LOGIN)
+        return false
     }
 
     fun logout() {
@@ -96,7 +101,7 @@ class ClientAPI(private val client: Client,
             answer = client.readAnswer()
             retries++
             Thread.sleep(100)
-            if(retries > 2) {
+            if (retries > 2) {
                 // If we get an error more than one time, it could be that we got logged out => login and try again
                 logout()
                 login()

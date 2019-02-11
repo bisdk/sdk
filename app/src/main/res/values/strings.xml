@@ -5,11 +5,12 @@
     <!-- Strings related to login -->
     <string name="prompt_username">Username</string>
     <string name="prompt_password">Password</string>
-    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in">Login</string>
     <string name="action_sign_in_short">Sign in</string>
-    <string name="prompt_host">host:port</string>
+    <string name="prompt_host">Host</string>
     <string name="welcome">welcome %1$s!</string>
     <string name="please_login">Please login to your gateway</string>
     <string name="not_logged_in">Not logged in</string>
     <string name="logged_in">Logged in</string>
+    <string name="mac_adress">MAC address</string>
 </resources>
