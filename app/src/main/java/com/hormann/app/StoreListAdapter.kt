@@ -6,11 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Filter
-import android.widget.TextView
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import com.hormann.app.discover.AppDatabase
 import com.hormann.app.discover.Gateway
+import kotlinx.android.synthetic.main.gateway_dropdown.view.*
 
 class StoreListAdapter(owner: LifecycleOwner, context: Context) : ArrayAdapter<Gateway>(context, R.layout.gateway_dropdown) {
 
@@ -42,10 +42,10 @@ class StoreListAdapter(owner: LifecycleOwner, context: Context) : ArrayAdapter<G
                     .inflate(itemLayout, parent, false)
         }
 
-        val strName = shadowView!!.findViewById<TextView>(R.id.store)
+        val strName = shadowView!!.store
         strName.text = getItem(position)?.sourceAddress
 
-        val couponCount = shadowView.findViewById<TextView>(R.id.coupon)
+        val couponCount = shadowView.coupon
         couponCount.text = getItem(position)?.mac
         return shadowView
     }

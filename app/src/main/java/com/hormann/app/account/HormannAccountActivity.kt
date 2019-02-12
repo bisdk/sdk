@@ -6,7 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.*
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.get
 import androidx.lifecycle.Observer
@@ -14,6 +14,7 @@ import androidx.work.*
 import com.hormann.app.R
 import com.hormann.app.StoreListAdapter
 import com.hormann.app.discover.DiscoverWorker
+import kotlinx.android.synthetic.main.activity_login.*
 
 
 class HormannAccountActivity : AppCompatAccountAuthenticatorActivity() {
@@ -24,13 +25,12 @@ class HormannAccountActivity : AppCompatAccountAuthenticatorActivity() {
         super.onCreate(icicle)
         setContentView(R.layout.activity_login)
 
-        val autoCompleteTextView = findViewById<AutoCompleteTextView>(R.id.gateway)
         val storeListAdapter = StoreListAdapter(this, this)
-        autoCompleteTextView.setAdapter(storeListAdapter)
-        autoCompleteTextView.setOnItemClickListener { parent, view, position, id ->
+        gateway.setAdapter(storeListAdapter)
+        gateway.setOnItemClickListener { parent, view, position, id ->
             val itemId = storeListAdapter.getItem(position)
-            findViewById<EditText>(R.id.gateway).setText(itemId?.sourceAddress)
-            findViewById<EditText>(R.id.mac).setText(itemId?.mac)
+            gateway.setText(itemId?.sourceAddress)
+            mac.setText(itemId?.mac)
             Log.d("TEST", parent[0].toString())
         }
         val constraints = Constraints.Builder()
@@ -42,11 +42,11 @@ class HormannAccountActivity : AppCompatAccountAuthenticatorActivity() {
         )
 
 
-        findViewById<Button>(R.id.login_in_button).setOnClickListener {
-            val host = findViewById<EditText>(R.id.gateway).text.toString()
-            val mac = findViewById<EditText>(R.id.mac).text.toString()
-            val userId = findViewById<EditText>(R.id.username).text.toString()
-            val passWd = findViewById<EditText>(R.id.password).text.toString()
+        login_in_button.setOnClickListener {
+            val host = gateway.text.toString()
+            val mac = mac.text.toString()
+            val userId = username.text.toString()
+            val passWd = password.text.toString()
 
             login(host, userId, passWd, mac.replace(":", "").toUpperCase())
         }
@@ -54,8 +54,8 @@ class HormannAccountActivity : AppCompatAccountAuthenticatorActivity() {
     }
 
     private fun login(host: String, userId: String, passWord: String, gatewayId: String) {
-        findViewById<ProgressBar>(R.id.login_progress).visibility = View.VISIBLE
-        findViewById<ScrollView>(R.id.login_form).visibility = View.GONE
+        login_progress.visibility = View.VISIBLE
+        login_form.visibility = View.GONE
         val constraints = Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build()
@@ -84,7 +84,7 @@ class HormannAccountActivity : AppCompatAccountAuthenticatorActivity() {
                             val authToken = "xxx"
                             val tokenType = "xxx"
 
-                            loginData.putString(AccountManager.KEY_ACCOUNT_NAME, userId)
+                            loginData.putString(AccountManager.KEY_ACCOUNT_NAME, "$userId@$host")
                             loginData.putString(AccountManager.KEY_ACCOUNT_TYPE, accountType)
                             loginData.putString(HormannAccountAuthenticator.TOKEN_TYPE, tokenType)
                             loginData.putString(AccountManager.KEY_AUTHTOKEN, authToken)
@@ -97,8 +97,8 @@ class HormannAccountActivity : AppCompatAccountAuthenticatorActivity() {
 
                             Toast.makeText(this@HormannAccountActivity, getString(R.string.logged_in), Toast.LENGTH_SHORT).show()
                         } else {
-                            findViewById<ProgressBar>(R.id.login_progress).visibility = View.GONE
-                            findViewById<ScrollView>(R.id.login_form).visibility = View.VISIBLE
+                            login_progress.visibility = View.GONE
+                            login_form.visibility = View.VISIBLE
                             Toast.makeText(this@HormannAccountActivity, getString(R.string.not_logged_in), Toast.LENGTH_SHORT).show()
                         }
 
