@@ -9,7 +9,7 @@ internal class PayloadTest {
     fun testJCMPPayload() {
         val commandGetUsers = "{\"CMD\":\"GET_USERS\"}"
         val payload = Payload.jmcp(commandGetUsers)
-        assertThat(payload.toByteArray().toHexString()).isEqualTo("7B22636D64223A224745545F5553455253227D")
+        assertThat(payload.toByteArray().toHexString()).isEqualTo("7B22434D44223A224745545F5553455253227D")
         assertThat(payload.toString()).isEqualTo(commandGetUsers)
 
     }

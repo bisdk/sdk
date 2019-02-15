@@ -26,6 +26,6 @@ internal class PackageTest {
         val testPackage = Package.jmcp("{\"cmd\":\"GET_VALUES\"}")
         val byteArray = testPackage.toByteArray()
         val message = byteArray.toHexString()
-        Assertions.assertThat(message).isEqualTo("001D0000000000067B22636D64223A224745545F5553455253227D20")
+        Assertions.assertThat(message).isEqualTo("001D0000000000067B22636D64223A224745545F56414C554553227D20")
     }
 }
