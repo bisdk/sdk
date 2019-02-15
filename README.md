@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/warting/bisecure-gateway.svg?branch=master)](https://travis-ci.org/warting/bisecure-gateway)
+[![Build Status](https://travis-ci.org/thomasletsch/bisecure-gateway.svg?branch=master)](https://travis-ci.org/thomasletsch/bisecure-gateway)
+
 # Bisecure Gateway Protocol
 Reverse Engineer the App &lt;-> BiSecure Gateway Protocol
 
