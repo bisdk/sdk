@@ -7,13 +7,13 @@ internal class TransportContainerKtTest {
 
     @Test
     fun toByteArrayLoginPackage() {
-        val expected = "0000000000005410EC03615000190000000000100674686F6D61736161616262626363632DF0".toByteArray()
+        val expected = "0000000000005410EC03615000190000000000100674686F6D61736161616262626363632DF0"
         val tc = TransportContainer(
             "000000000000",
             "5410EC036150",
             Package(command = Command.LOGIN, payload = Payload.login("thomas", "aaabbbccc"))
         )
-        assertThat(tc.toByteArray()).isEqualTo(expected)
+        assertThat(tc.toByteArray().toHexString()).isEqualTo(expected)
     }
 
     @Test
@@ -24,7 +24,7 @@ internal class TransportContainerKtTest {
         assertThat(tc.receiver).isEqualTo("000000000006")
         val pack = tc.pack
         assertThat(pack.tag).isEqualTo(0)
-        assertThat(pack.token).isEqualTo(0)
+        assertThat(pack.token).isEqualTo("00000000")
         assertThat(pack.command).isEqualTo(Command.EMPTY)
     }
 
@@ -36,7 +36,7 @@ internal class TransportContainerKtTest {
         assertThat(tc.receiver).isEqualTo("000000000006")
         val pack = tc.pack
         assertThat(pack.tag).isEqualTo(0)
-        assertThat(pack.token).isEqualTo(0)
+        assertThat(pack.token).isEqualTo("00000000")
         assertThat(pack.command).isEqualTo(Command.EMPTY)
     }
 }
