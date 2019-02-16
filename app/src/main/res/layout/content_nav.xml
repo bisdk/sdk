@@ -19,14 +19,49 @@
         app:layout_constraintTop_toTopOf="parent" />
 
 
-    <TextView
-        android:id="@+id/hello"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/add_gateway"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <LinearLayout
+            android:id="@+id/buttonsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="24dp"
+            android:orientation="vertical"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+
+        <Button
+                android:id="@+id/buttonGetName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/get_name"/>
+
+        <Button
+                android:id="@+id/buttonPing"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/ping"/>
+
+        <Button
+                android:id="@+id/buttonState"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/state"/>
+
+        <Button
+                android:id="@+id/buttonGroups"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/groups"/>
+
+        <Button
+                android:id="@+id/buttonLogout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/logout"/>
+
+    </LinearLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

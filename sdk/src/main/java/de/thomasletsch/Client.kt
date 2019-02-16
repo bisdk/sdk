@@ -11,12 +11,16 @@ import java.net.Socket
  * The sender address used is first "000000000000" but changes as result from login command.
  */
 class Client(
-        private val address: InetAddress,
-        private var sender: String,
-        private var receiver: String,
-        var token: String = "00000000",
-        private val port: Int = 4000
+    private val address: InetAddress,
+    private var sender: String,
+    private var receiver: String,
+    var token: String = defaultToken,
+    private val port: Int = 4000
 ) : AutoCloseable {
+
+    companion object {
+        const val defaultToken: String = "00000000"
+    }
 
     var s: Socket = Socket(address, port)
     var dataOut = DataOutputStream(s.getOutputStream())
@@ -24,6 +28,10 @@ class Client(
 
     init {
         println("Connecting to $address:$port")
+    }
+
+    fun setTokenOrDefault(token: String?) {
+        this.token = token ?: defaultToken
     }
 
     fun reconnect() {
@@ -47,13 +55,13 @@ class Client(
 
     fun readAnswer(): Package {
         val ba = readBytes()
-        if(ba.size < Lengths.ADDRESS_BYTES * 2) {
+        if (ba.size < Lengths.ADDRESS_BYTES * 2) {
             println("No valid answer received: " + ba.toHexString())
             return Package.empty()
         }
         val tc = TransportContainer.from(ba)
         println("Received: $tc")
-        if(tc.pack.command == Command.LOGIN) {
+        if (tc.pack.command == Command.LOGIN) {
             println("Received answer of LOGIN command => setting senderId and token")
             sender = tc.receiver
             token = tc.pack.payload.toByteArray().toHexString().substring(2)

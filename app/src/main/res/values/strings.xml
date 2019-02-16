@@ -21,4 +21,9 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
     <string name="add_gateway">Add gateway</string>
+    <string name="get_name">Get name</string>
+    <string name="ping">Ping</string>
+    <string name="state">Get state</string>
+    <string name="groups">get groups</string>
+    <string name="logout">Logout</string>
 </resources>

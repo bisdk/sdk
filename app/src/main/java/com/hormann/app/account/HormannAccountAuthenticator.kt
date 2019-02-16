@@ -6,6 +6,10 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
+import com.hormann.app.getMacAddress
+import de.thomasletsch.Client
+import de.thomasletsch.ClientAPI
+import java.net.InetAddress
 
 
 class HormannAccountAuthenticator(private val context: Context) : AbstractAccountAuthenticator(context) {
@@ -52,11 +56,22 @@ class HormannAccountAuthenticator(private val context: Context) : AbstractAccoun
         if (TextUtils.isEmpty(authToken)) {
             val password = accountManager.getPassword(account)
             if (password != null) {
-                authToken = "xxx"
+                HormannAccountAuthenticator.KEY_USER_DATA_HOST
+                val mac = accountManager.getUserData(account, HormannAccountAuthenticator.KEY_USER_DATA_MAC) ?: ""
+                val host = accountManager.getUserData(account, HormannAccountAuthenticator.KEY_USER_DATA_HOST) ?: ""
+
+                val username = account.name.split("@")[0]
+                val inetAddress = InetAddress.getByName(host)
+
+                authToken = ClientAPI(Client(inetAddress, getMacAddress(), mac)).getToken(username, password)
+
             }
         }
 
         if (!TextUtils.isEmpty(authToken)) {
+
+            accountManager.setAuthToken(account, authTokenType, authToken)
+
             val result = Bundle()
             result.putString(AccountManager.KEY_ACCOUNT_NAME, account.name)
             result.putString(AccountManager.KEY_ACCOUNT_TYPE, account.type)
@@ -104,6 +119,8 @@ class HormannAccountAuthenticator(private val context: Context) : AbstractAccoun
         const val PASSWORD = "password"
         const val ADD_ACCOUNT = "addAccount"
         const val TOKEN_TYPE = "tokenType"
+        const val KEY_USER_DATA_HOST = "KEY_USER_DATA_HOST"
+        const val KEY_USER_DATA_MAC = "KEY_USER_DATA_MAC"
         const val ACCOUNT_TYPE: String = "com.hormann.auth"
         const val TOKEN_TYPE_GATEWAY: String = "com.hormann.token.gateway"
     }

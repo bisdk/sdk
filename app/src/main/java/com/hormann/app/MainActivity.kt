@@ -1,27 +1,30 @@
 package com.hormann.app
 
+import android.accounts.Account
 import android.accounts.AccountManager
-import android.annotation.SuppressLint
+import android.accounts.OnAccountsUpdateListener
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.google.android.material.navigation.NavigationView
 import com.hormann.app.account.HormannAccountAuthenticator
-import de.thomasletsch.Client
-import de.thomasletsch.ClientAPI
 import kotlinx.android.synthetic.main.activity_nav.*
 import kotlinx.android.synthetic.main.app_bar_nav.*
 import kotlinx.android.synthetic.main.content_nav.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import java.net.InetAddress
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+
+    private lateinit var model: NameViewModel
+
+
+    private lateinit var accountManager: AccountManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +43,37 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             )
         }
 
+        accountManager = AccountManager.get(this)
+
+
+        model = ViewModelProviders.of(this).get(NameViewModel::class.java)
+
+        model.isConnected.observe(this, Observer { isConnected ->
+            Toast.makeText(this@MainActivity, "IsConnected: $isConnected", Toast.LENGTH_SHORT).show()
+        })
+        model.name.observe(this, Observer {
+            Toast.makeText(this@MainActivity, "Name: $it", Toast.LENGTH_SHORT).show()
+        })
+        model.ping.observe(this, Observer {
+            Toast.makeText(this@MainActivity, "Ping: $it", Toast.LENGTH_SHORT).show()
+        })
+        model.state.observe(this, Observer {
+            Toast.makeText(this@MainActivity, "State: $it", Toast.LENGTH_LONG).show()
+        })
+        model.groups.observe(this, Observer {
+            Toast.makeText(this@MainActivity, "Groups: $it", Toast.LENGTH_LONG).show()
+        })
+
+        buttonGetName.setOnClickListener { model.requestName() }
+        buttonPing.setOnClickListener { model.requestPing() }
+        buttonState.setOnClickListener { model.requestState() }
+        buttonGroups.setOnClickListener { model.requestGroups() }
+        buttonLogout.setOnClickListener {
+            accountManager.invalidateAuthToken(HormannAccountAuthenticator.TOKEN_TYPE_GATEWAY, model.token.value)
+            model.logout()
+            accountManager.removeAccount(currentAccount, this@MainActivity, null, null)
+        }
+
         val toggle = ActionBarDrawerToggle(
                 this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
         )
@@ -47,51 +81,52 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         toggle.syncState()
 
         nav_view.setNavigationItemSelectedListener(this)
+
+        accountManager.addOnAccountsUpdatedListener(listener, null, true)
+
     }
 
-    override fun onResume() {
-        super.onResume()
-        val accountManager = AccountManager.get(this)
-        val accounts = accountManager.getAccountsByType(HormannAccountAuthenticator.ACCOUNT_TYPE)
-        if (accounts.isEmpty()) {
-            buttonAddGateway.visibility = View.VISIBLE
-        } else {
-            buttonAddGateway.visibility = View.GONE
-            setup(accounts[0].name, accountManager.getPassword(accounts[0]))
-        }
+    override fun onDestroy() {
+        super.onDestroy()
+        accountManager.removeOnAccountsUpdatedListener(listener)
     }
 
-    @SuppressLint("SetTextI18n")
-    fun setup(account: String, password: String) {
-        val job = GlobalScope.launch(Dispatchers.IO) {
+    private var currentAccount: Account? = null
 
-            updateUi("Welcome")
-            updateUi("Setting up client")
-            val client = Client(InetAddress.getByName(account.split("@")[1]), "000000000000", "1410ECD7ECD6")
 
-            updateUi("Setting up client API")
-            val clientAPI = ClientAPI(client, account.split("@")[0], password)
-            updateUi("Name: ${clientAPI.getName()}")
-            updateUi("Ping: ${clientAPI.ping()}")
-            updateUi("Login in...")
-            clientAPI.login()
-            val state = clientAPI.getState()
-            //updateUi("State: $state")
-            val groups = clientAPI.getGroups()
-            updateUi("Groups: $groups")
-            val transition = clientAPI.getTransition(groups[0].ports[0])
-            updateUi("Groups: $transition")
-//        clientAPI.setState(groups[0].ports[0])
-            updateUi("Logging out...")
-            clientAPI.logout()
-            updateUi("Logged out")
+    val listener = OnAccountsUpdateListener {
+        it.iterator().forEach { account ->
+            if (account.type == HormannAccountAuthenticator.ACCOUNT_TYPE) {
+                setAccount(account)
+                return@OnAccountsUpdateListener
+            }
         }
+        removeAccount()
     }
 
-    private fun updateUi(s: String) {
-        this@MainActivity.runOnUiThread {
-            hello.text = "${hello.text}$s\n"
-        }
+
+    private fun setAccount(account: Account) {
+        currentAccount = account
+        buttonsContainer.visibility = View.VISIBLE
+        buttonAddGateway.visibility = View.GONE
+        loadToken(accountManager, account)
+    }
+
+    private fun removeAccount() {
+        buttonAddGateway.visibility = View.VISIBLE
+        buttonsContainer.visibility = View.GONE
+    }
+
+
+    private fun loadToken(accountManager: AccountManager, account: Account) {
+        accountManager.getAuthToken(account, HormannAccountAuthenticator.TOKEN_TYPE, null, this, {
+            val token: String? = it.result.getString(AccountManager.KEY_AUTHTOKEN)
+            if (token != null) {
+                model.host.value = accountManager.getUserData(account, HormannAccountAuthenticator.KEY_USER_DATA_HOST)
+                model.mac.value = accountManager.getUserData(account, HormannAccountAuthenticator.KEY_USER_DATA_MAC)
+                model.token.value = token
+            }
+        }, null)
     }
 
     override fun onBackPressed() {

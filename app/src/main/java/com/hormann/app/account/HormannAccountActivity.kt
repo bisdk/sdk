@@ -87,6 +87,8 @@ class HormannAccountActivity : AppCompatAccountAuthenticatorActivity() {
                             loginData.putString(AccountManager.KEY_ACCOUNT_NAME, "$userId@$host")
                             loginData.putString(AccountManager.KEY_ACCOUNT_TYPE, accountType)
                             loginData.putString(HormannAccountAuthenticator.TOKEN_TYPE, tokenType)
+                            loginData.putString(HormannAccountAuthenticator.KEY_USER_DATA_HOST, host)
+                            loginData.putString(HormannAccountAuthenticator.KEY_USER_DATA_MAC, gatewayId)
                             loginData.putString(AccountManager.KEY_AUTHTOKEN, authToken)
                             loginData.putString(HormannAccountAuthenticator.PASSWORD, passWord)
 
@@ -120,7 +122,17 @@ class HormannAccountActivity : AppCompatAccountAuthenticatorActivity() {
             val authToken = intent.getStringExtra(AccountManager.KEY_AUTHTOKEN)
             val tokenType = intent.getStringExtra(HormannAccountAuthenticator.TOKEN_TYPE)
 
-            accountManager!!.addAccountExplicitly(account, passWd, null)
+            val userData = Bundle()
+            userData.putString(
+                HormannAccountAuthenticator.KEY_USER_DATA_MAC,
+                intent.getStringExtra(HormannAccountAuthenticator.KEY_USER_DATA_MAC)
+            )
+            userData.putString(
+                HormannAccountAuthenticator.KEY_USER_DATA_HOST,
+                intent.getStringExtra(HormannAccountAuthenticator.KEY_USER_DATA_HOST)
+            )
+
+            accountManager!!.addAccountExplicitly(account, passWd, userData)
             accountManager!!.setAuthToken(account, tokenType, authToken)
         } else {
             accountManager!!.setPassword(account, passWd)

@@ -6,8 +6,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule
 
 class ClientAPI(
-    private val client: Client,
-    private val userName: String, private val password: String
+    val client: Client
 ) {
 
     fun getName(): String {
@@ -20,24 +19,20 @@ class ClientAPI(
         return client.readAnswer().payload.getContentAsString()
     }
 
-    fun login(): Boolean {
-        // We retry login because sometime we get a LOGOUT when another client (the android app) is also logged in.
-        // It seems that only one client can be logged in at the same time.
-        val maxRetries = 5
-        var retries = 0
-        do {
-            client.token = "00000000"  // reset the token before login
-            client.sendMessage(Package(command = Command.LOGIN, payload = Payload.login(userName, password)))
-            val answer = client.readAnswer()
-            if (answer.command == Command.LOGIN) {
-                return true
-            } else if (answer.command == Command.LOGOUT) {
-                logout()
-            }
-            retries++
-            Thread.sleep(100)
-        } while (retries < maxRetries && answer.command != Command.LOGIN)
+    fun login(userName: String, password: String): Boolean {
+        client.sendMessage(Package(command = Command.LOGIN, payload = Payload.login(userName, password)))
+        val answer = client.readAnswer()
+        if (answer.command == Command.LOGIN) {
+            return true
+        }
         return false
+    }
+
+    fun getToken(userName: String, password: String): String {
+        if (login(userName, password)) {
+            return client.token
+        }
+        throw AuthenticationException("Could not login")
     }
 
     fun logout() {
@@ -93,20 +88,8 @@ class ClientAPI(
      * Returns the current state of the port. You can see how much open it is or if it is still running.
      */
     fun getTransition(port: Port): Transition {
-        val maxRetries = 5
-        var retries = 0
-        var answer: Package
-        do {
-            client.sendMessage(Package(command = Command.HM_GET_TRANSITION, payload = Payload.getTransition(port.id)))
-            answer = client.readAnswer()
-            retries++
-            Thread.sleep(100)
-            if (retries > 2) {
-                // If we get an error more than one time, it could be that we got logged out => login and try again
-                logout()
-                login()
-            }
-        } while (retries < maxRetries && answer.command != Command.HM_GET_TRANSITION)
+        client.sendMessage(Package(command = Command.HM_GET_TRANSITION, payload = Payload.getTransition(port.id)))
+        val answer: Package = client.readAnswer()
         return Transition.from(answer.payload.toByteArray())
     }
 

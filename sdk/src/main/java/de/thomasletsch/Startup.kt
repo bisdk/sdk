@@ -17,11 +17,11 @@ class Startup {
         val discoveryData = future.join()
 
         val client = Client(discoveryData.sourceAddress, "000000000000", discoveryData.getGatewayId())
-        val clientAPI = ClientAPI(client, "thomas", "aaabbbccc")
+        val clientAPI = ClientAPI(client)
         println("Name: " + clientAPI.getName())
         println("Ping: " + clientAPI.ping())
         println("Login in...")
-        clientAPI.login()
+        clientAPI.login("thomas", "aaabbbccc")
         val state = clientAPI.getState()
         println("State: $state")
         val groups = clientAPI.getGroups()

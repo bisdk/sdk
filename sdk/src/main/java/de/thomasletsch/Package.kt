@@ -12,6 +12,9 @@ data class Package(
     val payload: Payload = Payload.empty(),
     val isResponse: Boolean = false
 ) {
+    init {
+        assert(token.length == 8)
+    }
     fun toByteArray(): ByteArray {
         return getLength().toShort().toByteArray()
                 .plus(tag.toByte().toByteArray())
