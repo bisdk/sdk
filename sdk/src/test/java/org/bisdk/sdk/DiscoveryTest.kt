@@ -1,4 +1,4 @@
-package de.thomasletsch
+package org.bisdk.sdk
 
 import org.junit.Ignore
 import org.junit.Test

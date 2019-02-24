@@ -1,4 +1,4 @@
-package de.thomasletsch
+package org.bisdk.sdk
 
 class PackageChecksum(val pack: Package) {
 

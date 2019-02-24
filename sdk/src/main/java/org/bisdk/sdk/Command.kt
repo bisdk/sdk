@@ -1,4 +1,4 @@
-package de.thomasletsch
+package org.bisdk.sdk
 
 /**
  * The protocol between the client and the bisecure gateway uses a 1-byte command to signal whats to be done.
@@ -8,7 +8,9 @@ package de.thomasletsch
 class Command(val code: Int, val name: String = "UNKNOWN") {
 
     companion object {
-        fun valueOf(code: Int) = values.firstOrNull { it.code == code } ?: Command(code)
+        fun valueOf(code: Int) = Command.Companion.values.firstOrNull { it.code == code } ?: Command(
+            code
+        )
         val EMPTY = Command(-1, "EMPTY")
         val PING = Command(0, "PING")
         val ERROR = Command(1, "ERROR")
@@ -21,7 +23,19 @@ class Command(val code: Int, val name: String = "UNKNOWN") {
         val SET_STATE = Command(51, "SET_STATE")
         val HM_GET_TRANSITION = Command(112, "HM_GET_TRANSITION")
 
-        val values = arrayListOf(EMPTY, PING, ERROR, GET_MAC, SET_VALUE, JMCP, LOGIN, LOGOUT, GET_NAME, SET_STATE, HM_GET_TRANSITION)
+        val values = arrayListOf(
+            Command.EMPTY,
+            Command.PING,
+            Command.ERROR,
+            Command.GET_MAC,
+            Command.SET_VALUE,
+            Command.JMCP,
+            Command.LOGIN,
+            Command.LOGOUT,
+            Command.GET_NAME,
+            Command.SET_STATE,
+            Command.HM_GET_TRANSITION
+        )
     }
 
     override fun toString(): String {

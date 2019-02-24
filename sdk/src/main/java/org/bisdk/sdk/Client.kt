@@ -1,4 +1,4 @@
-package de.thomasletsch
+package org.bisdk.sdk
 
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -55,13 +55,13 @@ class Client(
 
     fun readAnswer(): Package {
         val ba = readBytes()
-        if (ba.size < Lengths.ADDRESS_BYTES * 2) {
+        if (ba.size < Lengths.Companion.ADDRESS_BYTES * 2) {
             println("No valid answer received: " + ba.toHexString())
-            return Package.empty()
+            return Package.Companion.empty()
         }
-        val tc = TransportContainer.from(ba)
+        val tc = TransportContainer.Companion.from(ba)
         println("Received: $tc")
-        if (tc.pack.command == Command.LOGIN) {
+        if (tc.pack.command == Command.Companion.LOGIN) {
             println("Received answer of LOGIN command => setting senderId and token")
             sender = tc.receiver
             token = tc.pack.payload.toByteArray().toHexString().substring(2)

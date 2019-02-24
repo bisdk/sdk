@@ -1,4 +1,4 @@
-package de.thomasletsch
+package org.bisdk.sdk
 
 enum class Error(val code: Int) {
     COMMAND_NOT_FOUND(0),

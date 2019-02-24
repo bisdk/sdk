@@ -1,4 +1,4 @@
-package de.thomasletsch
+package org.bisdk.sdk
 
 import org.xml.sax.InputSource
 import java.io.StringReader
@@ -51,11 +51,11 @@ class Discovery {
             val element = doc.documentElement
 //            println("Element name: ${element.tagName}")
             val data = DiscoveryData(
-                    element.getAttribute("mac"),
-                    receivePacket.address,
-                    element.getAttribute("swVersion"),
-                    element.getAttribute("hwVersion"),
-                    element.getAttribute("protocol")
+                element.getAttribute("mac"),
+                receivePacket.address,
+                element.getAttribute("swVersion"),
+                element.getAttribute("hwVersion"),
+                element.getAttribute("protocol")
             )
             println("Gateway data: $data")
             data
