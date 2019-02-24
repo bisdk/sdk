@@ -7,13 +7,13 @@ class DiscoveryTest {
 
     @Test
     fun sendDiscoveryRequest() {
-        org.bisdk.sdk.Discovery().sendDiscoveryRequest()
+        Discovery().sendDiscoveryRequest()
     }
 
     @Test
     @Ignore // Doesn't work for everyone
     fun startServer() {
-        val discovery = org.bisdk.sdk.Discovery()
+        val discovery = Discovery()
         val server = discovery.startServer()
         discovery.sendDiscoveryRequest()
         val discoveryData = server.join()

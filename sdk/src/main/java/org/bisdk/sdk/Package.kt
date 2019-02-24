@@ -6,7 +6,7 @@ import java.math.BigInteger
  * A Package is sent over the socket to the gateway. It contains the command and the payload.
  */
 data class Package(
-    val command: org.bisdk.sdk.Command,
+    val command: Command,
     val tag: Int = 0,
     val token: String = "00000000",
     val payload: Payload = Payload.empty(),
@@ -37,19 +37,19 @@ data class Package(
     }
 
     override fun toString(): String {
-        if(command == org.bisdk.sdk.Command.ERROR) {
+        if(command == Command.ERROR) {
             return "command: $command, tag: $tag, token: $token, error: ${Error.from(payload.toByteArray()[0].toInt())}, isResponse=$isResponse"
         }
-        if(command == org.bisdk.sdk.Command.HM_GET_TRANSITION && isResponse) {
+        if(command == Command.HM_GET_TRANSITION && isResponse) {
             return "command: $command, tag: $tag, token: $token, payload: ${Transition.from(payload.toByteArray())}, isResponse=$isResponse"
         }
         return "command: $command, tag: $tag, token: $token, payload: $payload, isResponse=$isResponse"
     }
 
     companion object {
-        fun empty() = Package(org.bisdk.sdk.Command.EMPTY)
-        fun login(username: String, password: String) = Package(command = org.bisdk.sdk.Command.LOGIN, payload = Payload.login(username, password))
-        fun jmcp(content: String) = Package(command = org.bisdk.sdk.Command.JMCP, payload = Payload.jmcp(content))
+        fun empty() = Package(Command.EMPTY)
+        fun login(username: String, password: String) = Package(command = Command.LOGIN, payload = Payload.login(username, password))
+        fun jmcp(content: String) = Package(command = Command.JMCP, payload = Payload.jmcp(content))
 
         fun from(ba: ByteArray): Package {
             if(ba.size < Lengths.LENGTH_BYTES +  Lengths.TAG_BYTES + Lengths.TOKEN_BYTES + Lengths.COMMAND_BYTES) {
@@ -69,7 +69,7 @@ data class Package(
                 isResponse = true
             }
             idx += Lengths.COMMAND_BYTES
-            val command = org.bisdk.sdk.Command.valueOf(commandInt)
+            val command = Command.valueOf(commandInt)
             return Package(command, tag, token, Payload(ba.copyOfRange(idx, ba.size - 2)), isResponse)
         }
 

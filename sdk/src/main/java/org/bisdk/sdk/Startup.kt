@@ -11,13 +11,13 @@ class Startup {
      *  </ul>
      */
     fun startup() {
-        val discovery = org.bisdk.sdk.Discovery()
+        val discovery = Discovery()
         val future = discovery.startServer()
         discovery.sendDiscoveryRequest()
         val discoveryData = future.join()
 
-        val client = org.bisdk.sdk.Client(discoveryData.sourceAddress, "000000000000", discoveryData.getGatewayId())
-        val clientAPI = org.bisdk.sdk.ClientAPI(client)
+        val client = Client(discoveryData.sourceAddress, "000000000000", discoveryData.getGatewayId())
+        val clientAPI = ClientAPI(client)
         println("Name: " + clientAPI.getName())
         println("Ping: " + clientAPI.ping())
         println("Login in...")

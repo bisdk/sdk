@@ -14,7 +14,7 @@ class Client(
     private val address: InetAddress,
     private var sender: String,
     private var receiver: String,
-    var token: String = org.bisdk.sdk.Client.Companion.defaultToken,
+    var token: String = defaultToken,
     private val port: Int = 4000
 ) : AutoCloseable {
 
@@ -31,7 +31,7 @@ class Client(
     }
 
     fun setTokenOrDefault(token: String?) {
-        this.token = token ?: org.bisdk.sdk.Client.Companion.defaultToken
+        this.token = token ?: defaultToken
     }
 
     fun reconnect() {
@@ -42,10 +42,10 @@ class Client(
         dataIn = DataInputStream(s.getInputStream())
     }
 
-    fun sendMessage(message: org.bisdk.sdk.Package) {
+    fun sendMessage(message: Package) {
         val pack = message.copy(token = token)
         println("Sending package $pack")
-        val tc = org.bisdk.sdk.TransportContainer(sender, receiver, pack)
+        val tc = TransportContainer(sender, receiver, pack)
         val messageBytes = tc.toByteArray().encodeToGW()
         println("Sending transport container ${tc.toHexString()}")
 //        println("Raw: ${tc.toByteArray().encodeToGW().toHexString()}")
@@ -53,15 +53,15 @@ class Client(
         dataOut.flush()
     }
 
-    fun readAnswer(): org.bisdk.sdk.Package {
+    fun readAnswer(): Package {
         val ba = readBytes()
-        if (ba.size < org.bisdk.sdk.Lengths.Companion.ADDRESS_BYTES * 2) {
+        if (ba.size < Lengths.Companion.ADDRESS_BYTES * 2) {
             println("No valid answer received: " + ba.toHexString())
-            return org.bisdk.sdk.Package.Companion.empty()
+            return Package.Companion.empty()
         }
-        val tc = org.bisdk.sdk.TransportContainer.Companion.from(ba)
+        val tc = TransportContainer.Companion.from(ba)
         println("Received: $tc")
-        if (tc.pack.command == org.bisdk.sdk.Command.Companion.LOGIN) {
+        if (tc.pack.command == Command.Companion.LOGIN) {
             println("Received answer of LOGIN command => setting senderId and token")
             sender = tc.receiver
             token = tc.pack.payload.toByteArray().toHexString().substring(2)

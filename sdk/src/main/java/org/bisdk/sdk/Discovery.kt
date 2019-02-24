@@ -33,7 +33,7 @@ class Discovery {
         socket.send(request)
     }
 
-    fun startServer(): CompletableFuture<org.bisdk.sdk.DiscoveryData> {
+    fun startServer(): CompletableFuture<DiscoveryData> {
         val serverSocket = DatagramSocket(null)
         serverSocket.reuseAddress = true
         serverSocket.bind(InetSocketAddress(4002))
@@ -50,7 +50,7 @@ class Discovery {
             val doc = dBuilder.parse(xmlInput)
             val element = doc.documentElement
 //            println("Element name: ${element.tagName}")
-            val data = org.bisdk.sdk.DiscoveryData(
+            val data = DiscoveryData(
                 element.getAttribute("mac"),
                 receivePacket.address,
                 element.getAttribute("swVersion"),
@@ -62,7 +62,7 @@ class Discovery {
         }
     }
 
-    fun start(): CompletableFuture<org.bisdk.sdk.DiscoveryData> {
+    fun start(): CompletableFuture<DiscoveryData> {
         val startServer = startServer()
         sendDiscoveryRequest()
         return startServer
