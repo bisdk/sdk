@@ -1,4 +1,4 @@
-package de.thomasletsch
+package org.bisdk.sdk
 
 enum class PayloadType {
     MCP, JMCP

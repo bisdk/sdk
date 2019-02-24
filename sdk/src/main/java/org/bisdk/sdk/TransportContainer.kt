@@ -1,4 +1,4 @@
-package de.thomasletsch
+package org.bisdk.sdk
 
 /**
  * All messages (Packages) are encapsulated inside a transport container. It defines the sender, receiver and a checksum.

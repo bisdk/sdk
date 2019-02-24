@@ -1,4 +1,4 @@
-package de.thomasletsch
+package org.bisdk.sdk
 
 import org.assertj.core.api.Assertions
 import org.junit.Test
@@ -15,7 +15,7 @@ internal class PackageTest {
 
     @Test
     fun testGetName() {
-        val testPackage = Package(command = Command.GET_NAME, payload = Payload.empty())
+        val testPackage = Package(command = org.bisdk.sdk.Command.GET_NAME, payload = Payload.empty())
         val byteArray = testPackage.toByteArray()
         val message = byteArray.toHexString()
         Assertions.assertThat(message).isEqualTo("00090000000000262F")

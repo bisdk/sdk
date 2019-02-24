@@ -1,4 +1,4 @@
-package de.thomasletsch
+package org.bisdk.sdk
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test

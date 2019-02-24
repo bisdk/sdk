@@ -1,4 +1,4 @@
-package de.thomasletsch
+package org.bisdk.sdk
 
 import org.xml.sax.InputSource
 import java.io.StringReader
@@ -33,7 +33,7 @@ class Discovery {
         socket.send(request)
     }
 
-    fun startServer(): CompletableFuture<DiscoveryData> {
+    fun startServer(): CompletableFuture<org.bisdk.sdk.DiscoveryData> {
         val serverSocket = DatagramSocket(null)
         serverSocket.reuseAddress = true
         serverSocket.bind(InetSocketAddress(4002))
@@ -50,19 +50,19 @@ class Discovery {
             val doc = dBuilder.parse(xmlInput)
             val element = doc.documentElement
 //            println("Element name: ${element.tagName}")
-            val data = DiscoveryData(
-                    element.getAttribute("mac"),
-                    receivePacket.address,
-                    element.getAttribute("swVersion"),
-                    element.getAttribute("hwVersion"),
-                    element.getAttribute("protocol")
+            val data = org.bisdk.sdk.DiscoveryData(
+                element.getAttribute("mac"),
+                receivePacket.address,
+                element.getAttribute("swVersion"),
+                element.getAttribute("hwVersion"),
+                element.getAttribute("protocol")
             )
             println("Gateway data: $data")
             data
         }
     }
 
-    fun start(): CompletableFuture<DiscoveryData> {
+    fun start(): CompletableFuture<org.bisdk.sdk.DiscoveryData> {
         val startServer = startServer()
         sendDiscoveryRequest()
         return startServer

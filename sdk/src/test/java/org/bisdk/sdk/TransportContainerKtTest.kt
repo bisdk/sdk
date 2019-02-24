@@ -1,4 +1,4 @@
-package de.thomasletsch
+package org.bisdk.sdk
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -11,7 +11,7 @@ internal class TransportContainerKtTest {
         val tc = TransportContainer(
             "000000000000",
             "5410EC036150",
-            Package(command = Command.LOGIN, payload = Payload.login("thomas", "aaabbbccc"))
+            Package(command = org.bisdk.sdk.Command.LOGIN, payload = Payload.login("thomas", "aaabbbccc"))
         )
         assertThat(tc.toByteArray().toHexString()).isEqualTo(expected)
     }
@@ -25,7 +25,7 @@ internal class TransportContainerKtTest {
         val pack = tc.pack
         assertThat(pack.tag).isEqualTo(0)
         assertThat(pack.token).isEqualTo("00000000")
-        assertThat(pack.command).isEqualTo(Command.EMPTY)
+        assertThat(pack.command).isEqualTo(org.bisdk.sdk.Command.EMPTY)
     }
 
     @Test
@@ -37,6 +37,6 @@ internal class TransportContainerKtTest {
         val pack = tc.pack
         assertThat(pack.tag).isEqualTo(0)
         assertThat(pack.token).isEqualTo("00000000")
-        assertThat(pack.command).isEqualTo(Command.EMPTY)
+        assertThat(pack.command).isEqualTo(org.bisdk.sdk.Command.EMPTY)
     }
 }
