@@ -1,0 +1,11 @@
+{
+  "name": "sandbox",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Kotlin multi-platform project with js tests",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "mocha": "$mocha_version"
+  }
+}
