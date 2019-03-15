@@ -1,4 +1,4 @@
-package org.bisdk.sdk
+package org.bisdk
 
 enum class PayloadType {
     MCP, JMCP
@@ -21,7 +21,6 @@ data class Payload(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (javaClass != other?.javaClass) return false
 
         other as Payload
 

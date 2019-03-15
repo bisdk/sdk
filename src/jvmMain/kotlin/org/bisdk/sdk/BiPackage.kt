@@ -1,8 +1,6 @@
 package org.bisdk.sdk
 
-import org.bisdk.BiError
-import org.bisdk.Command
-import org.bisdk.Lengths
+import org.bisdk.*
 import java.math.BigInteger
 
 /**
@@ -19,7 +17,7 @@ data class BiPackage(
         assert(token.length == 8)
     }
     fun toByteArray(): ByteArray {
-        return getLength().toShort().toByteArray()
+        return getLength().toByteArray(2)
             .plus(tag.toByte().toByteArray())
                 .plus(token.toHexByteArray())
                 .plus(command.code.toByte().toByteArray())

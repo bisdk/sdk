@@ -1,5 +1,7 @@
 package org.bisdk.sdk
 
+import org.bisdk.toHexInt
+
 class PackageChecksum(val pack: BiPackage) {
 
     fun calculate(): Int {

@@ -1,5 +1,6 @@
 package org.bisdk.sdk
 
+import org.bisdk.toByteArray
 import java.nio.ByteBuffer
 import java.time.LocalDateTime
 import java.util.*

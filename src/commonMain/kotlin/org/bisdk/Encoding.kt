@@ -1,16 +1,11 @@
-package org.bisdk.sdk
+package org.bisdk
 
-import java.nio.ByteBuffer
+import kotlinx.io.core.toByteArray
 
 /**
  * Converts the int to a 4-byte ByteArray
  */
-fun Int.toByteArray() = ByteBuffer.allocate(4).putInt(this).array()!!
-
-/**
- * Converts the int to a 2-byte ByteArray
- */
-fun Short.toByteArray() = ByteBuffer.allocate(2).putShort(this).array()!!
+fun Int.toByteArray(size: Int) = ByteArray(2) { this.ushr((size - 1 - it) * 8).toByte() }
 
 /**
  * Converts the byte to a 1-byte ByteArray (just convenience method)
@@ -20,6 +15,7 @@ fun Byte.toByteArray() = ByteArray(1).apply { set(0, this@toByteArray) }
 /**
  * Converts the byte to a 2 digit hex value string
  */
+@ExperimentalUnsignedTypes
 fun Byte.toHexString() = toUByte().toString(16).padStart(2, '0').toUpperCase()
 
 /**
@@ -71,4 +67,9 @@ fun String.toGWByteArray() = toByteArray()
  */
 fun String.toHexByteArray() = chunked(2).map { it.toInt(16).toByte() }.toByteArray()
 
-fun String.toHexInt() = ByteBuffer.wrap(toHexByteArray()).int
+fun String.toHexInt(): Int {
+    val bytes = toHexByteArray()
+    val intBits =
+        bytes[0].toInt().shl(24) or (bytes[1].toInt() and 0xFF shl 16) or (bytes[2].toInt() and 0xFF shl 8) or (bytes[3].toInt() and 0xFF)
+    return intBits
+}

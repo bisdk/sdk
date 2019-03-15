@@ -1,6 +1,7 @@
 package org.bisdk.sdk
 
 import org.assertj.core.api.Assertions.assertThat
+import org.bisdk.toHexByteArray
 import org.junit.Test
 
 internal class TransitionTest {
