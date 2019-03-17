@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule
 import org.bisdk.AuthenticationException
 import org.bisdk.Command
+import org.bisdk.Payload
 
 class ClientAPI(
     val client: Client

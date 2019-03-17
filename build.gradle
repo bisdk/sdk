@@ -48,8 +48,6 @@ kotlin {
             dependencies {
                 implementation 'org.jetbrains.kotlin:kotlin-stdlib-common'
                 implementation "org.jetbrains.kotlinx:kotlinx-io:$kotlinx_io_version"
-
-
             }
         }
         commonTest {
@@ -66,7 +64,6 @@ kotlin {
                 implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.9.8'
                 implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.9.8'
                 implementation "org.jetbrains.kotlinx:kotlinx-io-jvm:$kotlinx_io_version"
-
             }
         }
         jvmTest {
@@ -79,6 +76,7 @@ kotlin {
         jsMain {
             dependencies {
                 implementation 'org.jetbrains.kotlin:kotlin-stdlib-js'
+                implementation "org.jetbrains.kotlinx:kotlinx-io-js:$kotlinx_io_version"
             }
         }
         jsTest {

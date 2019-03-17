@@ -1,9 +1,6 @@
 package org.bisdk.sdk
 
-import org.bisdk.BiError
-import org.bisdk.Command
-import org.bisdk.Lengths
-import java.math.BigInteger
+import org.bisdk.*
 
 /**
  * A BiPackage is sent over the socket to the gateway. It contains the command and the payload.
@@ -19,7 +16,7 @@ data class BiPackage(
         assert(token.length == 8)
     }
     fun toByteArray(): ByteArray {
-        return getLength().toShort().toByteArray()
+        return getLength().toByteArray(2)
             .plus(tag.toByte().toByteArray())
                 .plus(token.toHexByteArray())
                 .plus(command.code.toByte().toByteArray())
@@ -69,7 +66,7 @@ data class BiPackage(
             idx += Lengths.TOKEN_BYTES
             var commandInt = (ba.copyOfRange(idx, idx + Lengths.COMMAND_BYTES).toHexString()).toInt(16)
             var isResponse = false
-            if(BigInteger.valueOf(commandInt.toLong()).testBit(7)) {
+            if(commandInt.testBit(7)) {
                commandInt  = commandInt xor (1 shl 7)
                 isResponse = true
             }

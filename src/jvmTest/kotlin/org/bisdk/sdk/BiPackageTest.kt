@@ -2,6 +2,8 @@ package org.bisdk.sdk
 
 import org.assertj.core.api.Assertions
 import org.bisdk.Command
+import org.bisdk.Payload
+import org.bisdk.toHexString
 import org.junit.Test
 
 internal class BiPackageTest {

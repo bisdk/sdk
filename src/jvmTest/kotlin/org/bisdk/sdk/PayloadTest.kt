@@ -1,6 +1,10 @@
 package org.bisdk.sdk
 
 import org.assertj.core.api.Assertions.assertThat
+import org.bisdk.Payload
+import org.bisdk.toHexByteArray
+import org.bisdk.toHexString
+import org.bisdk.toHexStringFromGW
 import org.junit.Test
 
 internal class PayloadTest {

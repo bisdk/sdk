@@ -1,6 +1,9 @@
 package org.bisdk.sdk
 
 import org.bisdk.Lengths
+import org.bisdk.toByteArray
+import org.bisdk.toHexByteArray
+import org.bisdk.toHexString
 
 /**
  * All messages (Packages) are encapsulated inside a transport container. It defines the sender, receiver and a checksum.

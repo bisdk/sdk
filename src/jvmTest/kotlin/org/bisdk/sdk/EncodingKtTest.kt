@@ -1,6 +1,10 @@
 package org.bisdk.sdk
 
 import org.assertj.core.api.Assertions.assertThat
+import org.bisdk.decodeFromGW
+import org.bisdk.toGWByteArray
+import org.bisdk.toHexByteArray
+import org.bisdk.toHexString
 import org.junit.Test
 
 class EncodingKtTest {
