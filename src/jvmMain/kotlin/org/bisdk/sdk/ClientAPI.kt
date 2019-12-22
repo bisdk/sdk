@@ -1,6 +1,6 @@
 package org.bisdk.sdk
 
-import com.fasterxml.jackson.databind.JsonMappingException
+import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -12,7 +12,7 @@ import java.net.SocketException
 
 class ClientAPI(
     val client: Client
-): AutoCloseable {
+) : AutoCloseable {
     private var userName: String? = null
     private var password: String? = null
 
@@ -81,16 +81,25 @@ class ClientAPI(
      * The getState command returns a map of port and some kind of number. For now I don't know how to handle that
      */
     fun getState(): HashMap<String, Int> {
-        val answer = sendWithRetry(
-            BiPackage(
-                command = Command.JMCP,
-                payload = Payload.getValues()
+        var i = 3
+        while (i-- > 0) {
+            val answer = sendWithRetry(
+                BiPackage(
+                    command = Command.JMCP,
+                    payload = Payload.getValues()
+                )
             )
-        )
-        val json = answer.payload.getContentAsString()
-        val mapper = ObjectMapper()
-        mapper.registerModules(KotlinModule(), ParameterNamesModule())
-        return mapper.readValue(json)
+            val json = answer.payload.getContentAsString()
+            val mapper = ObjectMapper()
+            mapper.registerModules(KotlinModule(), ParameterNamesModule())
+            try {
+                return mapper.readValue(json)
+            } catch (e: JsonProcessingException) {
+                println("Could not deserialize Groups from $json, error: " + e.message)
+                Thread.sleep(500)
+            }
+        }
+        throw IllegalStateException("Retry failed, got error answer! ")
     }
 
     /**
@@ -111,7 +120,7 @@ class ClientAPI(
             try {
                 val value = mapper.readValue<List<Group>>(json)
                 return value
-            } catch (e: JsonMappingException) {
+            } catch (e: JsonProcessingException) {
                 println("Could not deserialize Groups from $json, error: " + e.message)
                 Thread.sleep(500)
             }

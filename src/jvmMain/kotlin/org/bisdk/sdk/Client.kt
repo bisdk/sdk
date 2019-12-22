@@ -44,6 +44,10 @@ class Client(
     }
 
     fun sendMessage(message: BiPackage) {
+        if(message.command == Command.LOGIN) {
+            // Reset internal token when new login command is issued
+            this.token = defaultToken
+        }
         val pack = message.copy(token = token)
         println("Sending package $pack")
         val tc = TransportContainer(sender, receiver, pack)
@@ -56,7 +60,7 @@ class Client(
 
     fun readAnswer(): BiPackage {
         val ba = readBytes()
-        if (ba.size < Lengths.Companion.ADDRESS_BYTES * 2) {
+        if (ba.size < Lengths.Companion.ADDRESS_SIZE) {
             println("No valid answer received: " + ba.toHexString())
             return BiPackage.empty()
         }
@@ -77,7 +81,9 @@ class Client(
     private fun readBytes(): ByteArray {
         val bytesRead = ArrayList<Byte>()
 //        println("Reading from socket...")
-        val timeout = 1000
+        // We have to wait for all bytes a really long time. 3sec should hopefully be enough...
+        // Otherwise we would need to read all bytes always and check always if we have a complete package
+        val timeout = 5000
         val startTime = System.currentTimeMillis()
         while (System.currentTimeMillis() < (startTime + timeout)) {
             while (dataIn.available() > 0) {
@@ -85,6 +91,10 @@ class Client(
             }
             if (dataIn.available() == 0) {
                 Thread.sleep(100)
+                if(dataIn.available() == 0 && bytesRead.size > Lengths.Companion.ADDRESS_SIZE) {
+                    // No more data available and enough read
+                    break;
+                }
             }
         }
         val ba = bytesRead.toByteArray().decodeFromGW()
