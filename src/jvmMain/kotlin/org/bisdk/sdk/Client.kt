@@ -43,26 +43,6 @@ class Client(
         dataIn = DataInputStream(s.getInputStream())
     }
 
-    fun sendWithRetry(message: BiPackage): BiPackage {
-        sendMessage(message)
-        var i = 3L
-        while (i-- > 0) {
-            try {
-                val answer = readAnswer()
-                if (answer.command == Command.ERROR || answer.command == Command.EMPTY) {
-                    println("Received ERROR or EMPTY answer => retrying...")
-                    Thread.sleep((4 - i) * 500) // Increase waiting time for each retry
-                } else {
-                    return answer
-                }
-            } catch (e: Exception) {
-                println("Received Exception ${e.message} => retrying...")
-                Thread.sleep((4 - i) * 500) // Increase waiting time for each retry
-            }
-        }
-        throw IllegalStateException("Retry failed, got error answer! ")
-    }
-
     fun sendMessage(message: BiPackage) {
         val pack = message.copy(token = token)
         println("Sending package $pack")

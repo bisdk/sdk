@@ -8,28 +8,28 @@ import com.fasterxml.jackson.module.paramnames.ParameterNamesModule
 import org.bisdk.AuthenticationException
 import org.bisdk.Command
 import org.bisdk.Payload
+import java.net.SocketException
 
 class ClientAPI(
     val client: Client
-) {
-
+): AutoCloseable {
     private var userName: String? = null
     private var password: String? = null
 
     fun getName(): String {
-        val answer = client.sendWithRetry(BiPackage(Command.GET_NAME))
+        val answer = sendWithRetry(BiPackage(Command.GET_NAME))
         return answer.payload.getContentAsString()
     }
 
     fun ping(): String {
-        val answer = client.sendWithRetry(BiPackage(Command.PING))
+        val answer = sendWithRetry(BiPackage(Command.PING))
         return answer.payload.getContentAsString()
     }
 
     fun login(userName: String, password: String): Boolean {
         var i = 3
         while (i-- > 0) {
-            val answer = client.sendWithRetry(
+            val answer = sendWithRetry(
                 BiPackage(
                     command = Command.LOGIN,
                     payload = Payload.login(userName, password)
@@ -51,7 +51,12 @@ class ClientAPI(
         if (userName == null || password == null) {
             return
         }
-        login(userName!!, password!!)
+        client.sendMessage(
+            BiPackage(
+                command = Command.LOGIN,
+                payload = Payload.login(userName!!, password!!)
+            )
+        )
     }
 
     fun getToken(userName: String, password: String): String {
@@ -62,7 +67,9 @@ class ClientAPI(
     }
 
     fun logout() {
-        val answer = client.sendWithRetry(
+        // We do not send logout with retry since it could be called when something is disposed after some time
+        // Chances are very high that the connection is already gone
+        client.sendMessage(
             BiPackage(
                 command = Command.LOGOUT,
                 payload = Payload.empty()
@@ -74,7 +81,7 @@ class ClientAPI(
      * The getState command returns a map of port and some kind of number. For now I don't know how to handle that
      */
     fun getState(): HashMap<String, Int> {
-        val answer = client.sendWithRetry(
+        val answer = sendWithRetry(
             BiPackage(
                 command = Command.JMCP,
                 payload = Payload.getValues()
@@ -92,7 +99,7 @@ class ClientAPI(
     fun getGroups(): List<Group> {
         var i = 3
         while (i-- > 0) {
-            val answer = client.sendWithRetry(
+            val answer = sendWithRetry(
                 BiPackage(
                     command = Command.JMCP,
                     payload = Payload.getGroups()
@@ -116,7 +123,7 @@ class ClientAPI(
      * This will return only the devices that are paired with the current user. We probably never will need this.
      */
     fun getGroupsForUser(): List<Group> {
-        val answer = client.sendWithRetry(
+        val answer = sendWithRetry(
             BiPackage(
                 command = Command.JMCP,
                 payload = Payload.getGroupsForUser()
@@ -132,7 +139,7 @@ class ClientAPI(
      * Triggers an action on the device. For the garage door this means open/close the door (like pressing a button on the hand held)
      */
     fun setState(port: Port): BiPackage {
-        return client.sendWithRetry(
+        return sendWithRetry(
             BiPackage(
                 command = Command.SET_STATE,
                 payload = Payload.setState(port.id)
@@ -144,13 +151,53 @@ class ClientAPI(
      * Returns the current state of the port. You can see how much open it is or if it is still running.
      */
     fun getTransition(port: Port): Transition {
-        val answer: BiPackage = client.sendWithRetry(
+        val answer: BiPackage = sendWithRetry(
             BiPackage(
                 command = Command.HM_GET_TRANSITION,
                 payload = Payload.getTransition(port.id)
             )
         )
         return Transition.from(answer.payload.toByteArray())
+    }
+
+
+    private fun sendWithRetry(message: BiPackage): BiPackage {
+        client.sendMessage(message)
+        var error = "N/A"
+        var i = 3L
+        while (i-- > 0) {
+            try {
+                val answer = client.readAnswer()
+                if (answer.command == Command.ERROR) {
+                    println("Received ERROR answer => retrying...")
+                    error = "Received ERROR answer"
+                    Thread.sleep((4 - i) * 500) // Increase waiting time for each retry
+                } else if (answer.command == Command.EMPTY) {
+                    println("Received EMPTY answer => reconnecting...")
+                    error = "Received EMPTY answer"
+                    client.reconnect()
+                    relogin()
+                    Thread.sleep((4 - i) * 500) // Increase waiting time for each retry
+                } else {
+                    return answer
+                }
+            } catch (e: SocketException) {
+                println("Received SocketException ${e.message} => reconnecting...")
+                client.reconnect()
+                relogin()
+                Thread.sleep((4 - i) * 500) // Increase waiting time for each retry
+            } catch (e: Exception) {
+                println("Received Exception ${e.message} => retrying...")
+                error = "Received Exception ${e.message}"
+                Thread.sleep((4 - i) * 500) // Increase waiting time for each retry
+            }
+        }
+        throw IllegalStateException("Retry failed: $error")
+    }
+
+
+    override fun close() {
+        client.close()
     }
 
 }
