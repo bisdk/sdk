@@ -36,9 +36,11 @@ data class BiPackage(
         return toByteArray().toHexString()
     }
 
+    fun getBiError(): BiError? = BiError.from(payload.toByteArray()[0].toInt())
+
     override fun toString(): String {
         if(command == Command.ERROR) {
-            return "command: $command, tag: $tag, token: $token, error: ${BiError.from(payload.toByteArray()[0].toInt())}, isResponse=$isResponse"
+            return "command: $command, tag: $tag, token: $token, error: ${getBiError()}, isResponse=$isResponse"
         }
         if(command == Command.HM_GET_TRANSITION && isResponse) {
             return "command: $command, tag: $tag, token: $token, payload: ${Transition.from(payload.toByteArray())}, isResponse=$isResponse"

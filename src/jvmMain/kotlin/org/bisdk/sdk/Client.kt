@@ -43,6 +43,26 @@ class Client(
         dataIn = DataInputStream(s.getInputStream())
     }
 
+    fun sendWithRetry(message: BiPackage): BiPackage {
+        sendMessage(message)
+        var i = 3L
+        while (i-- > 0) {
+            try {
+                val answer = readAnswer()
+                if (answer.command == Command.ERROR || answer.command == Command.EMPTY) {
+                    println("Received ERROR or EMPTY answer => retrying...")
+                    Thread.sleep((4 - i) * 500) // Increase waiting time for each retry
+                } else {
+                    return answer
+                }
+            } catch (e: Exception) {
+                println("Received Exception ${e.message} => retrying...")
+                Thread.sleep((4 - i) * 500) // Increase waiting time for each retry
+            }
+        }
+        throw IllegalStateException("Retry failed, got error answer! ")
+    }
+
     fun sendMessage(message: BiPackage) {
         val pack = message.copy(token = token)
         println("Sending package $pack")
@@ -66,6 +86,10 @@ class Client(
             println("Received answer of LOGIN command => setting senderId and token")
             sender = tc.receiver
             token = tc.pack.payload.toByteArray().toHexString().substring(2)
+        }
+        if (tc.pack.command == Command.ERROR && tc.pack.getBiError() != null && tc.pack.getBiError() == BiError.PERMISSION_DENIED) {
+            println("Received PERMISSION_DENIED")
+            throw PermissionDeniedException()
         }
         return tc.pack
     }

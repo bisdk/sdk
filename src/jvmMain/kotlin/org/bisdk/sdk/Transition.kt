@@ -8,6 +8,7 @@ import java.util.*
 data class Transition(
     /**
      * 100 is OPEN, 0 = CLOSED
+     * 200 = UNLOCKED, 0 = LOCKED????
      */
     val stateInPercent: Int,
     /**
