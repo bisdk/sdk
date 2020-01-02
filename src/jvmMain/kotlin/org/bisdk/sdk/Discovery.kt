@@ -39,17 +39,15 @@ class Discovery {
         serverSocket.bind(InetSocketAddress(4002))
         val receiveData = ByteArray(1024)
         val receivePacket = DatagramPacket(receiveData, receiveData.size)
-        println("Starting UDP Server on port ${serverSocket.localPort}")
+        Logger.info("Starting UDP Server on port ${serverSocket.localPort}")
         return CompletableFuture.supplyAsync {
             serverSocket.receive(receivePacket)
             val sentence = String(receivePacket.data.copyOf(receivePacket.length))
-//            println("RECEIVED: $sentence")
             val dbFactory = DocumentBuilderFactory.newInstance()
             val dBuilder = dbFactory.newDocumentBuilder()
             val xmlInput = InputSource(StringReader(sentence))
             val doc = dBuilder.parse(xmlInput)
             val element = doc.documentElement
-//            println("Element name: ${element.tagName}")
             val data = DiscoveryData(
                 element.getAttribute("mac"),
                 receivePacket.address,
@@ -57,7 +55,7 @@ class Discovery {
                 element.getAttribute("hwVersion"),
                 element.getAttribute("protocol")
             )
-            println("Gateway data: $data")
+            Logger.info("Gateway data: $data")
             data
         }
     }

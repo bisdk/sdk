@@ -40,7 +40,7 @@ class ClientAPI(
                 this.password = password
                 return true
             } else {
-                Logger.log("Received " + answer.command + " and not LOGIN as expected => retrying...")
+                Logger.info("Received " + answer.command + " and not LOGIN as expected => retrying...")
                 Thread.sleep(500)
             }
         }
@@ -95,7 +95,7 @@ class ClientAPI(
             try {
                 return mapper.readValue(json)
             } catch (e: JsonProcessingException) {
-                println("Could not deserialize Groups from $json, error: " + e.message)
+                Logger.info("Could not deserialize Groups from $json, error: " + e.message + " -> retrying...")
                 Thread.sleep(500)
             }
         }
@@ -121,7 +121,7 @@ class ClientAPI(
                 val value = mapper.readValue<List<Group>>(json)
                 return value
             } catch (e: JsonProcessingException) {
-                Logger.log("Could not deserialize Groups from $json, error: " + e.message)
+                Logger.info("Could not deserialize Groups from $json, error: " + e.message + " -> retrying...")
                 Thread.sleep(500)
             }
         }
@@ -176,7 +176,7 @@ class ClientAPI(
             try {
                 client.sendMessage(message)
             } catch (e: Exception) {
-                Logger.log("Received Exception ${e.message} => reconnecting...")
+                Logger.info("Received Exception ${e.message} => reconnecting...")
                 client.reconnect()
                 relogin()
                 Thread.sleep((4 - sendCounter) * 500) // Increase waiting time for each retry
@@ -188,11 +188,11 @@ class ClientAPI(
             try {
                 val answer = client.readAnswer()
                 if (answer.command == Command.ERROR) {
-                    Logger.log("Received ERROR answer => retrying...")
+                    Logger.info("Received ERROR answer => retrying...")
                     error = "Received ERROR answer"
                     Thread.sleep((4 - i) * 500) // Increase waiting time for each retry
                 } else if (answer.command == Command.EMPTY) {
-                    Logger.log("Received EMPTY answer => reconnecting...")
+                    Logger.info("Received EMPTY answer => reconnecting...")
                     error = "Received EMPTY answer"
                     client.reconnect()
                     relogin()
@@ -201,12 +201,12 @@ class ClientAPI(
                     return answer
                 }
             } catch (e: SocketException) {
-                Logger.log("Received SocketException ${e.message} => reconnecting...")
+                Logger.info("Received SocketException ${e.message} => reconnecting...")
                 client.reconnect()
                 relogin()
                 Thread.sleep((4 - i) * 500) // Increase waiting time for each retry
             } catch (e: Exception) {
-                Logger.log("Received Exception ${e.message} => retrying...")
+                Logger.info("Received Exception ${e.message} => retrying...")
                 error = "Received Exception ${e.message}"
                 Thread.sleep((4 - i) * 500) // Increase waiting time for each retry
             }

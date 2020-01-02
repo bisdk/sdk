@@ -23,11 +23,11 @@ class SenderThread(val client: Client, private val sendTimeout: Int = 5000) : Ru
     }
 
     private fun waitForMessageProcessed(message: TransportContainer) {
-        Logger.log("waitForMessageProcessed")
+        Logger.debug("waitForMessageProcessed")
         val startTime = System.currentTimeMillis()
         while (queue.contains(message)) {
             val elapsedTime = System.currentTimeMillis() - startTime
-//            println("elapsedTime: $elapsedTime")
+            Logger.debug("elapsedTime: $elapsedTime")
             if (elapsedTime > sendTimeout) {
                 queue.remove(message)
                 throw IllegalStateException("Message could not be sent after waiting $sendTimeout ms)")
@@ -39,21 +39,20 @@ class SenderThread(val client: Client, private val sendTimeout: Int = 5000) : Ru
             exception = null
             throw localException!!
         }
-        Logger.log("waitForMessageProcessed finished")
+        Logger.debug("waitForMessageProcessed finished")
     }
 
     private fun waitUntilQueueEmpty() {
-        Logger.log("waitUntilQueueEmpty")
+        Logger.debug("waitUntilQueueEmpty")
         val startTime = System.currentTimeMillis()
         while (queue.isNotEmpty()) {
             val elapsedTime = System.currentTimeMillis() - startTime
-//            println("elapsedTime: $elapsedTime")
             if (elapsedTime > sendTimeout) {
                 throw IllegalStateException("Could not enqueue message, queue is full (after waiting $sendTimeout ms)")
             }
             Thread.sleep(50)
         }
-        Logger.log("waitUntilQueueEmpty finished")
+        Logger.debug("waitUntilQueueEmpty finished")
     }
 
     override fun run() {
@@ -63,7 +62,7 @@ class SenderThread(val client: Client, private val sendTimeout: Int = 5000) : Ru
             }
             val message = queue[0]
             val messageBytes = message.toByteArray().encodeToGW()
-            Logger.log("Sending transport container ${message.toHexString()}")
+            Logger.debug("Sending transport container ${message.toHexString()}")
             try {
                 client.dataOut.write(messageBytes)
                 client.dataOut.flush()
@@ -71,7 +70,7 @@ class SenderThread(val client: Client, private val sendTimeout: Int = 5000) : Ru
                 exception = e
             }
             queue.remove(message)
-            Logger.log("Sending done")
+            Logger.debug("Sending done")
         }
     }
 }

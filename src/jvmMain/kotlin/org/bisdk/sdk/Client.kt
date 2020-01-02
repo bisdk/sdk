@@ -46,7 +46,7 @@ class Client(
     var senderThread: SenderThread
 
     init {
-        Logger.log("Connecting to $address:$port")
+        Logger.info("Connecting to $address:$port")
         s.connect(InetSocketAddress(address, port), connectTimeout)
         dataOut = DataOutputStream(s.getOutputStream())
         dataIn = DataInputStream(s.getInputStream())
@@ -59,16 +59,16 @@ class Client(
     }
 
     fun reconnect() {
-        Logger.log("Reconnecting")
+        Logger.debug("Reconnecting")
         close()
         connect()
     }
 
     private fun connect() {
         s = Socket()
-        Logger.log("Connecting...")
+        Logger.debug("Connecting...")
         s.connect(InetSocketAddress(address, port), connectTimeout)
-        Logger.log("Connected")
+        Logger.debug("Connected")
         dataOut = DataOutputStream(s.getOutputStream())
         dataIn = DataInputStream(s.getInputStream())
         senderThread = SenderThread(this)
@@ -84,7 +84,7 @@ class Client(
             this.token = defaultToken
         }
         val pack = message.copy(token = token)
-        Logger.log("Sending package $pack")
+        Logger.debug("Sending package $pack")
         val tc = TransportContainer(sender, receiver, pack)
         senderThread.send(tc)
     }
@@ -92,18 +92,18 @@ class Client(
     fun readAnswer(): BiPackage {
         val ba = readBytes()
         if (ba.size < Lengths.Companion.ADDRESS_SIZE) {
-            Logger.log("No valid answer received: " + ba.toHexString())
+            Logger.info("No valid answer received: " + ba.toHexString())
             return BiPackage.empty()
         }
         val tc = TransportContainer.from(ba)
-        Logger.log("Received: $tc")
+        Logger.debug("Received: $tc")
         if (tc.pack.command == Command.LOGIN) {
-            Logger.log("Received answer of LOGIN command => setting senderId and token")
+            Logger.debug("Received answer of LOGIN command => setting senderId and token")
             sender = tc.receiver
             token = tc.pack.payload.toByteArray().toHexString().substring(2)
         }
         if (tc.pack.command == Command.ERROR && tc.pack.getBiError() != null && tc.pack.getBiError() == BiError.PERMISSION_DENIED) {
-            Logger.log("Received PERMISSION_DENIED")
+            Logger.debug("Received PERMISSION_DENIED")
             throw PermissionDeniedException()
         }
         return tc.pack
@@ -111,7 +111,7 @@ class Client(
 
     private fun readBytes(): ByteArray {
         val bytesRead = ArrayList<Byte>()
-//        println("Reading from socket...")
+        Logger.debug("Reading from socket...")
         // We have to wait for all bytes a really long time. 3sec should hopefully be enough...
         // Otherwise we would need to read all bytes always and check always if we have a complete package
         val startTime = System.currentTimeMillis()
@@ -128,7 +128,7 @@ class Client(
             }
         }
         val ba = bytesRead.toByteArray().decodeFromGW()
-        Logger.log("Received from socket: " + ba.toHexString())
+        Logger.debug("Received from socket: " + ba.toHexString())
         return ba
     }
 
