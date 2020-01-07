@@ -1,45 +1,56 @@
 package org.bisdk.sdk
 
+/**
+ * Abstraction of a basic logger to be used by external applications.
+ *
+ * Set your own LoggerAdapter and include BiSdk in your own logging framework.
+ */
 class Logger {
 
     companion object {
-        var isDebugEnabled: Boolean = false
-        var isInfoEnabled: Boolean = true
-        var isWarnEnabled: Boolean = true
-        fun setDebugLevel() {
-            isDebugEnabled = true
-            isInfoEnabled = true
-            isWarnEnabled = true
-        }
-        fun setInfoLevel() {
-            isDebugEnabled = false
-            isInfoEnabled = true
-            isWarnEnabled = true
-        }
-        fun setWarnLevel() {
-            isDebugEnabled = false
-            isInfoEnabled = false
-            isWarnEnabled = true
-        }
-        fun setNoopLevel() {
-            isDebugEnabled = false
-            isInfoEnabled = false
-            isWarnEnabled = false
+        private var internalAdapter: LoggerAdapter = PrintlnAdapter()
+        fun setLoggerAdapter(newLoggerAdapter: LoggerAdapter) {
+            internalAdapter = newLoggerAdapter
         }
         fun debug(message: String) {
-            if(isDebugEnabled) {
-                println(message)
-            }
+            internalAdapter.debug(message)
         }
         fun info(message: String) {
-            if(isInfoEnabled) {
-                println(message)
-            }
+            internalAdapter.info(message)
         }
         fun warn(message: String) {
-            if(isWarnEnabled) {
-                println(message)
-            }
+            internalAdapter.warn(message)
         }
     }
+}
+
+class PrintlnAdapter : LoggerAdapter {
+    override fun debug(message: String) {
+        println(message)
+    }
+
+    override fun info(message: String) {
+        println(message)
+    }
+
+    override fun warn(message: String) {
+        println(message)
+    }
+}
+
+class NoopAdapter : LoggerAdapter {
+    override fun debug(message: String) {
+    }
+
+    override fun info(message: String) {
+    }
+
+    override fun warn(message: String) {
+    }
+}
+
+interface LoggerAdapter {
+    fun debug(message: String)
+    fun info(message: String)
+    fun warn(message: String)
 }
