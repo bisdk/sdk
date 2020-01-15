@@ -1,5 +1,7 @@
 package org.bisdk.sdk
 
+import java.time.LocalDateTime
+
 /**
  * Abstraction of a basic logger to be used by external applications.
  *
@@ -26,15 +28,15 @@ class Logger {
 
 class PrintlnAdapter : LoggerAdapter {
     override fun debug(message: String) {
-        println(message)
+        println(LocalDateTime.now().toString() + " DEBUG: " + message)
     }
 
     override fun info(message: String) {
-        println(message)
+        println(LocalDateTime.now().toString() + " INFO: " + message)
     }
 
     override fun warn(message: String) {
-        println(message)
+        println(LocalDateTime.now().toString() + " WARN: " + message)
     }
 }
 

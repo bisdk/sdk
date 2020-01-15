@@ -74,7 +74,12 @@ data class BiPackage(
             }
             idx += Lengths.COMMAND_BYTES
             val command = Command.valueOf(commandInt)
-            return BiPackage(command, tag, token, Payload(ba.copyOfRange(idx, ba.size - 2)), isResponse)
+            val payloadLength = length - Lengths.LENGTH_BYTES - Lengths.TAG_BYTES - Lengths.TOKEN_BYTES - Lengths.COMMAND_BYTES
+            if(ba.size < idx + payloadLength) {
+                return empty()
+            }
+            val payloadBytes = ba.copyOfRange(idx, idx + payloadLength - 1)
+            return BiPackage(command, tag, token, Payload(payloadBytes), isResponse)
         }
 
         fun fromHexString(hex: String): BiPackage {

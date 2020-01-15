@@ -20,6 +20,8 @@ class TransportContainer(
 
     fun toHexString() = sender + receiver + pack.toHexString() + checksum.toHexString()
 
+    fun size() = toByteArray().size / 2
+
     override fun toString() = "sender: $sender, receiver: $receiver, pack: $pack, checksum: ${checksum.toHexString()}"
 
     companion object {

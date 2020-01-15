@@ -16,7 +16,7 @@ class Startup {
         discovery.sendDiscoveryRequest()
         val discoveryData = future.join()
 
-        val client = Client(discoveryData.sourceAddress, "000000000000", discoveryData.getGatewayId())
+        val client = GatewayConnection(discoveryData.sourceAddress, "000000000000", discoveryData.getGatewayId())
         val clientAPI = ClientAPI(client)
         println("Name: " + clientAPI.getName())
         println("Ping: " + clientAPI.ping())

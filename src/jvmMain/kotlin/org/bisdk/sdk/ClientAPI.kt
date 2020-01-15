@@ -6,15 +6,17 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule
 import org.bisdk.AuthenticationException
+import org.bisdk.BiError
 import org.bisdk.Command
 import org.bisdk.Payload
 import java.net.SocketException
 
 class ClientAPI(
-    val client: Client
+    val gatewayConnection: GatewayConnection
 ) : AutoCloseable {
     private var userName: String? = null
     private var password: String? = null
+    private var tag = 0
 
     fun getName(): String {
         val answer = sendWithRetry(BiPackage(Command.GET_NAME))
@@ -51,7 +53,7 @@ class ClientAPI(
         if (userName == null || password == null) {
             return
         }
-        client.sendMessage(
+        gatewayConnection.sendMessage(
             BiPackage(
                 command = Command.LOGIN,
                 payload = Payload.login(userName!!, password!!)
@@ -61,7 +63,7 @@ class ClientAPI(
 
     fun getToken(userName: String, password: String): String {
         if (login(userName, password)) {
-            return client.token
+            return gatewayConnection.token
         }
         throw AuthenticationException("Could not login")
     }
@@ -69,7 +71,7 @@ class ClientAPI(
     fun logout() {
         // We do not send logout with retry since it could be called when something is disposed after some time
         // Chances are very high that the connection is already gone
-        client.sendMessage(
+        gatewayConnection.sendMessage(
             BiPackage(
                 command = Command.LOGOUT,
                 payload = Payload.empty()
@@ -169,15 +171,16 @@ class ClientAPI(
         return Transition.from(answer.payload.toByteArray())
     }
 
-
-    private fun sendWithRetry(message: BiPackage): BiPackage {
+    private fun sendWithRetry(messageToSend: BiPackage): BiPackage {
+        val message = messageToSend.copy(tag = getNewTag())
         var sendCounter = 3L
         while (sendCounter-- > 0) {
             try {
-                client.sendMessage(message)
+                gatewayConnection.sendMessage(message)
+                break
             } catch (e: Exception) {
                 Logger.info("Received Exception ${e.message} => reconnecting...")
-                client.reconnect()
+                gatewayConnection.reconnect()
                 relogin()
                 Thread.sleep((4 - sendCounter) * 500) // Increase waiting time for each retry
             }
@@ -186,23 +189,34 @@ class ClientAPI(
         var i = 3L
         while (i-- > 0) {
             try {
-                val answer = client.readAnswer()
-                if (answer.command == Command.ERROR) {
+                val tc = gatewayConnection.readAnswer(message.tag)
+                val command = tc.pack.command
+                if (tc.pack.command == Command.ERROR && tc.pack.getBiError() != null && tc.pack.getBiError() == BiError.PERMISSION_DENIED) {
+                    Logger.debug("Received PERMISSION_DENIED => relogin...")
+                    relogin()
+                    Thread.sleep((4 - i) * 500) // Increase waiting time for each retry
+                } else if (command == Command.ERROR) {
                     Logger.info("Received ERROR answer => retrying...")
                     error = "Received ERROR answer"
                     Thread.sleep((4 - i) * 500) // Increase waiting time for each retry
-                } else if (answer.command == Command.EMPTY) {
-                    Logger.info("Received EMPTY answer => reconnecting...")
+                } else if (command == Command.EMPTY && i == 1L) {
+                    Logger.info("Received EMPTY answer 2 times => reconnecting...")
                     error = "Received EMPTY answer"
-                    client.reconnect()
+                    gatewayConnection.reconnect()
                     relogin()
                     Thread.sleep((4 - i) * 500) // Increase waiting time for each retry
+                } else if (command == Command.EMPTY) {
+                    Logger.info("Received EMPTY answer => retrying...")
+                    error = "Received EMPTY answer"
+                    Thread.sleep((4 - i) * 500) // Increase waiting time for each retry
+                } else if (command == Command.LOGIN) {
+                    Logger.debug("Received answer of LOGIN command")
                 } else {
-                    return answer
+                    return tc.pack
                 }
             } catch (e: SocketException) {
                 Logger.info("Received SocketException ${e.message} => reconnecting...")
-                client.reconnect()
+                gatewayConnection.reconnect()
                 relogin()
                 Thread.sleep((4 - i) * 500) // Increase waiting time for each retry
             } catch (e: Exception) {
@@ -210,13 +224,22 @@ class ClientAPI(
                 error = "Received Exception ${e.message}"
                 Thread.sleep((4 - i) * 500) // Increase waiting time for each retry
             }
+
         }
         throw IllegalStateException("Retry failed: $error")
     }
 
+    private fun getNewTag(): Int {
+        if(tag >= 128) {
+            tag = 0
+        } else {
+            tag++
+        }
+        return tag
+    }
 
     override fun close() {
-        client.close()
+        gatewayConnection.close()
     }
 
 }

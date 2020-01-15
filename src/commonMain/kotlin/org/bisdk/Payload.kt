@@ -21,11 +21,8 @@ data class Payload(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-
         other as Payload
-
         if (!content.contentEquals(other.content)) return false
-
         return true
     }
 
