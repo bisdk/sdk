@@ -11,7 +11,7 @@ class PackageChecksum(val pack: BiPackage) {
         value += (pack.token.toHexInt() shr 8 and 255)
         value += (pack.token.toHexInt() shr 16 and 255)
         value += (pack.token.toHexInt() shr 24 and 255)
-        value += pack.command.code
+        value += pack.getCommandCode()
         pack.payload.toByteArray().forEach {
             value += it
         }

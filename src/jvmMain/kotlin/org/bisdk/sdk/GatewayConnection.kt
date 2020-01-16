@@ -94,7 +94,7 @@ class GatewayConnection(
         }
         val pack = message.copy(token = token)
         Logger.debug("Sending package $pack")
-        val tc = TransportContainer(senderId, receiverId, pack)
+        val tc = TransportContainer.create(senderId, receiverId, pack)
         sender.send(tc)
     }
 

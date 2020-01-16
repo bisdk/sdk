@@ -19,12 +19,12 @@ class ClientAPI(
     private var tag = 0
 
     fun getName(): String {
-        val answer = sendWithRetry(BiPackage(Command.GET_NAME))
+        val answer = sendWithRetry(BiPackage.fromCommandAndPayload(Command.GET_NAME, Payload.empty()))
         return answer.payload.getContentAsString()
     }
 
     fun ping(): String {
-        val answer = sendWithRetry(BiPackage(Command.PING))
+        val answer = sendWithRetry(BiPackage.fromCommandAndPayload(Command.PING, Payload.empty()))
         return answer.payload.getContentAsString()
     }
 
@@ -32,7 +32,7 @@ class ClientAPI(
         var i = 3
         while (i-- > 0) {
             val answer = sendWithRetry(
-                BiPackage(
+                BiPackage.fromCommandAndPayload(
                     command = Command.LOGIN,
                     payload = Payload.login(userName, password)
                 )
@@ -54,7 +54,7 @@ class ClientAPI(
             return
         }
         gatewayConnection.sendMessage(
-            BiPackage(
+            BiPackage.fromCommandAndPayload(
                 command = Command.LOGIN,
                 payload = Payload.login(userName!!, password!!)
             )
@@ -72,7 +72,7 @@ class ClientAPI(
         // We do not send logout with retry since it could be called when something is disposed after some time
         // Chances are very high that the connection is already gone
         gatewayConnection.sendMessage(
-            BiPackage(
+            BiPackage.fromCommandAndPayload(
                 command = Command.LOGOUT,
                 payload = Payload.empty()
             )
@@ -86,7 +86,7 @@ class ClientAPI(
         var i = 3
         while (i-- > 0) {
             val answer = sendWithRetry(
-                BiPackage(
+                BiPackage.fromCommandAndPayload(
                     command = Command.JMCP,
                     payload = Payload.getValues()
                 )
@@ -111,7 +111,7 @@ class ClientAPI(
         var i = 3
         while (i-- > 0) {
             val answer = sendWithRetry(
-                BiPackage(
+                BiPackage.fromCommandAndPayload(
                     command = Command.JMCP,
                     payload = Payload.getGroups()
                 )
@@ -135,7 +135,7 @@ class ClientAPI(
      */
     fun getGroupsForUser(): List<Group> {
         val answer = sendWithRetry(
-            BiPackage(
+            BiPackage.fromCommandAndPayload(
                 command = Command.JMCP,
                 payload = Payload.getGroupsForUser()
             )
@@ -151,7 +151,7 @@ class ClientAPI(
      */
     fun setState(port: Port): BiPackage {
         return sendWithRetry(
-            BiPackage(
+            BiPackage.fromCommandAndPayload(
                 command = Command.SET_STATE,
                 payload = Payload.setState(port.id)
             )
@@ -163,7 +163,7 @@ class ClientAPI(
      */
     fun getTransition(port: Port): Transition {
         val answer: BiPackage = sendWithRetry(
-            BiPackage(
+            BiPackage.fromCommandAndPayload(
                 command = Command.HM_GET_TRANSITION,
                 payload = Payload.getTransition(port.id)
             )
@@ -209,8 +209,6 @@ class ClientAPI(
                     Logger.info("Received EMPTY answer => retrying...")
                     error = "Received EMPTY answer"
                     Thread.sleep((4 - i) * 500) // Increase waiting time for each retry
-                } else if (command == Command.LOGIN) {
-                    Logger.debug("Received answer of LOGIN command")
                 } else {
                     return tc.pack
                 }
