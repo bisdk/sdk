@@ -46,7 +46,7 @@ class TransportContainer(
             val receiver = hex.substring(Lengths.ADDRESS_SIZE, Lengths.ADDRESS_SIZE * 2)
             val pack =
                 BiPackage.fromHexString(hex.substring(Lengths.ADDRESS_SIZE * 2, hex.length - Lengths.CHECKSUM_SIZE))
-            val checksum = hex.substring(hex.length - Lengths.CHECKSUM_SIZE, hex.length).toByte(16)
+            val checksum = hex.substring(hex.length - Lengths.CHECKSUM_SIZE, hex.length).toInt(16).toByte()
             return TransportContainer(sender, receiver, pack, checksum)
         }
 
