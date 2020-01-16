@@ -53,12 +53,14 @@ class ClientAPI(
         if (userName == null || password == null) {
             return
         }
+        val newTag = getNewTag()
         gatewayConnection.sendMessage(
             BiPackage.fromCommandAndPayload(
                 command = Command.LOGIN,
                 payload = Payload.login(userName!!, password!!)
-            )
+            ).copy(tag = newTag)
         )
+        gatewayConnection.readAnswer(newTag)
     }
 
     fun getToken(userName: String, password: String): String {
@@ -75,7 +77,7 @@ class ClientAPI(
             BiPackage.fromCommandAndPayload(
                 command = Command.LOGOUT,
                 payload = Payload.empty()
-            )
+            ).copy(tag = getNewTag())
         )
     }
 

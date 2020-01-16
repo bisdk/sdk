@@ -37,7 +37,7 @@ class GatewayConnection(
      * Primary constructor for non - kotlin clients. Only contains needed params.
      * Both params can be derived from the {@see Discovery} object.
      */
-    constructor(address: InetAddress, gatewayId: String): this(address, defaultSenderId, gatewayId, defaultToken)
+    constructor(address: InetAddress, gatewayId: String) : this(address, defaultSenderId, gatewayId, defaultToken)
 
     companion object {
         const val defaultToken: String = "00000000"
@@ -91,6 +91,10 @@ class GatewayConnection(
         if (message.command == Command.LOGIN) {
             // Reset internal token when new login command is issued
             this.token = defaultToken
+        }
+        if (token == defaultToken && message.command != Command.LOGIN && message.command != Command.GET_NAME) {
+            Logger.warn("Message to be sent, but not authenticated! Ignoring message...")
+            return
         }
         val pack = message.copy(token = token)
         Logger.debug("Sending package $pack")
