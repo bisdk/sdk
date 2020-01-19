@@ -22,11 +22,13 @@ class GatewayConnection(
     /**
      * Timeout in ms before a send message request is aborted
      */
-    private val sendTimeout: Int = 5000,
+    private val sendTimeout: Int = 10000,
     /**
-     * Timeout in ms before a read request is aborted
+     * Timeout in ms before a read request is aborted.
+     * Tests have shown that there are some requests that need some more time to be fulfilled.
+     * An overall timeout must therefore be quite high, 15sec is probably a minimum.
      */
-    private val readTimeout: Int = 5000,
+    private val readTimeout: Int = 15000,
     /**
      * Timeout in ms before a connection request is aborted
      */
@@ -92,7 +94,7 @@ class GatewayConnection(
             // Reset internal token when new login command is issued
             this.token = defaultToken
         }
-        if (token == defaultToken && message.command != Command.LOGIN && message.command != Command.GET_NAME) {
+        if (token == defaultToken && message.command.authenticationRequired) {
             Logger.warn("Message to be sent, but not authenticated! Ignoring message...")
             return
         }

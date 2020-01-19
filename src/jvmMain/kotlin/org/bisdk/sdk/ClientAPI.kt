@@ -110,26 +110,22 @@ class ClientAPI(
      * The groups are the paired devices. This call returns all devices known to the GW
      */
     fun getGroups(): List<Group> {
-        var i = 3
-        while (i-- > 0) {
-            val answer = sendWithRetry(
-                BiPackage.fromCommandAndPayload(
-                    command = Command.JMCP,
-                    payload = Payload.getGroups()
-                )
+        val answer = sendWithRetry(
+            BiPackage.fromCommandAndPayload(
+                command = Command.JMCP,
+                payload = Payload.getGroups()
             )
-            val json = answer.payload.getContentAsString()
-            val mapper = ObjectMapper()
-            mapper.registerModules(KotlinModule(), ParameterNamesModule())
-            try {
-                val value = mapper.readValue<List<Group>>(json)
-                return value
-            } catch (e: JsonProcessingException) {
-                Logger.info("Could not deserialize Groups from $json, error: " + e.message + " -> retrying...")
-                Thread.sleep(500)
-            }
+        )
+        val json = answer.payload.getContentAsString()
+        val mapper = ObjectMapper()
+        mapper.registerModules(KotlinModule(), ParameterNamesModule())
+        try {
+            val value = mapper.readValue<List<Group>>(json)
+            return value
+        } catch (e: JsonProcessingException) {
+            Logger.info("Could not deserialize Groups from $json, error: " + e.message + " -> retrying...")
+            throw e
         }
-        throw IllegalStateException("Retry failed, got error answer! ")
     }
 
     /**
@@ -188,7 +184,7 @@ class ClientAPI(
             }
         }
         var error = "N/A"
-        var i = 3L
+        var i = 2L
         while (i-- > 0) {
             try {
                 val tc = gatewayConnection.readAnswer(message.tag)
@@ -196,21 +192,24 @@ class ClientAPI(
                 if (tc.pack.command == Command.ERROR && tc.pack.getBiError() != null && tc.pack.getBiError() == BiError.PERMISSION_DENIED) {
                     Logger.debug("Received PERMISSION_DENIED => relogin...")
                     relogin()
-                    Thread.sleep((4 - i) * 500) // Increase waiting time for each retry
+                    gatewayConnection.sendMessage(message)
+                    Thread.sleep(500)
                 } else if (command == Command.ERROR) {
                     Logger.info("Received ERROR answer => retrying...")
                     error = "Received ERROR answer"
-                    Thread.sleep((4 - i) * 500) // Increase waiting time for each retry
+                    gatewayConnection.sendMessage(message)
+                    Thread.sleep(500)
                 } else if (command == Command.EMPTY && i == 1L) {
                     Logger.info("Received EMPTY answer 2 times => reconnecting...")
                     error = "Received EMPTY answer"
                     gatewayConnection.reconnect()
                     relogin()
-                    Thread.sleep((4 - i) * 500) // Increase waiting time for each retry
+                    gatewayConnection.sendMessage(message)
+                    Thread.sleep(500)
                 } else if (command == Command.EMPTY) {
-                    Logger.info("Received EMPTY answer => retrying...")
+                    Logger.info("Received EMPTY answer => waiting...")
                     error = "Received EMPTY answer"
-                    Thread.sleep((4 - i) * 500) // Increase waiting time for each retry
+                    Thread.sleep(500)
                 } else {
                     return tc.pack
                 }
@@ -218,11 +217,12 @@ class ClientAPI(
                 Logger.info("Received SocketException ${e.message} => reconnecting...")
                 gatewayConnection.reconnect()
                 relogin()
-                Thread.sleep((4 - i) * 500) // Increase waiting time for each retry
+                gatewayConnection.sendMessage(message)
+                Thread.sleep(500)
             } catch (e: Exception) {
                 Logger.info("Received Exception ${e.message} => retrying...")
                 error = "Received Exception ${e.message}"
-                Thread.sleep((4 - i) * 500) // Increase waiting time for each retry
+                Thread.sleep(500)
             }
 
         }
@@ -230,7 +230,7 @@ class ClientAPI(
     }
 
     private fun getNewTag(): Int {
-        if(tag >= 128) {
+        if (tag >= 128) {
             tag = 0
         } else {
             tag++
