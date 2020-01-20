@@ -47,8 +47,14 @@ class Receiver(private val dataIn: DataInputStream, private val readTimeout: Int
     private fun readBytes(): ByteArray {
         val bytesRead = ArrayList<Byte>()
         Logger.debug("Reading from socket...")
-        while (dataIn.available() == 0) {
-            Thread.sleep(50)
+        try {
+            while (dataIn.available() == 0) {
+                Thread.sleep(50)
+            }
+        } catch (e: IOException) {
+            exception = e
+            Logger.debug("Received exception while waiting for bytes: $e")
+            return ByteArray(0)
         }
         // We have to wait for all bytes a really long time. 5sec should hopefully be enough...
         // Otherwise we would need to read all bytes always and check always if we have a complete package
@@ -66,10 +72,10 @@ class Receiver(private val dataIn: DataInputStream, private val readTimeout: Int
                     (0..(bytesRead.size - tcMinimalLength)).forEach {
                         val ba = bytesRead.subList(it, bytesRead.size).toByteArray().decodeFromGW()
                         val tc = TransportContainer.from(ba)
-                        if(tc.pack.command != Command.EMPTY) {
+                        if (tc.pack.command != Command.EMPTY) {
 //                            Logger.debug("Checking " + ba.toHexString())
                         }
-                        if (tc.hasCorrectChecksum() && tc.pack.command != Command.EMPTY ) {
+                        if (tc.hasCorrectChecksum() && tc.pack.command != Command.EMPTY) {
                             Logger.debug("Received from socket: " + ba.toHexString())
                             return ba
                         }
