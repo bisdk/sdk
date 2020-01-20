@@ -22,13 +22,13 @@ class GatewayConnection(
     /**
      * Timeout in ms before a send message request is aborted
      */
-    private val sendTimeout: Int = 10000,
+    private val sendTimeout: Int = 2000,
     /**
      * Timeout in ms before a read request is aborted.
      * Tests have shown that there are some requests that need some more time to be fulfilled.
      * An overall timeout must therefore be quite high, 15sec is probably a minimum.
      */
-    private val readTimeout: Int = 15000,
+    private val readTimeout: Int = 2000,
     /**
      * Timeout in ms before a connection request is aborted
      */

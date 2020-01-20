@@ -11,6 +11,27 @@ import org.bisdk.Command
 import org.bisdk.Payload
 import java.net.SocketException
 
+/**
+ * The ClientAPI is the high-level API for sending commands to the BiSecure Gateway.
+ * It is the preferred way to use the BiSDK library.
+ *
+ * A ClientAPI needs a GatewayConnection to work. This which can be retrieved / initialized with the result of the discovery.
+ *
+ * Example usage:
+ *
+ *      val discovery = Discovery()
+ *      val future = discovery.startServer()
+ *      discovery.sendDiscoveryRequest()
+ *      val discoveryData = future.join()
+ *      val client = GatewayConnection(address = discoveryData.sourceAddress, gatewayId =  discoveryData.getGatewayId())
+ *      val clientAPI = ClientAPI(client)
+ *
+ * Most of the commands need you to authorize first:
+ *      clientAPI.login("username", "password")
+ *  This will create a session and the token will be automatically used for the next commands.
+ *  After you are done, you can logout again:
+ *      clientAPI.logout()
+ */
 class ClientAPI(
     val gatewayConnection: GatewayConnection
 ) : AutoCloseable {
@@ -23,9 +44,13 @@ class ClientAPI(
         return answer.payload.getContentAsString()
     }
 
-    fun ping(): String {
-        val answer = sendWithRetry(BiPackage.fromCommandAndPayload(Command.PING, Payload.empty()))
-        return answer.payload.getContentAsString()
+    fun ping(): Boolean {
+        return try {
+            val answer = sendDirectly(BiPackage.fromCommandAndPayload(Command.PING, Payload.empty()))
+            answer.command == Command.PING
+        } catch (e: Exception) {
+            false
+        }
     }
 
     fun login(userName: String, password: String): Boolean {
@@ -169,6 +194,11 @@ class ClientAPI(
         return Transition.from(answer.payload.toByteArray())
     }
 
+    /**
+     * Central method to handle all error conditions wile sending and receiving data from the gateway.
+     *
+     * It will retry certain times and try to handle special error conditions with a good retry / reconnect / relogin strategy
+     */
     private fun sendWithRetry(messageToSend: BiPackage): BiPackage {
         val message = messageToSend.copy(tag = getNewTag())
         var sendCounter = 3L
@@ -219,6 +249,15 @@ class ClientAPI(
                 relogin()
                 gatewayConnection.sendMessage(message)
                 Thread.sleep(500)
+            } catch (e: IllegalStateException) {
+                Logger.debug(
+                    "Received Exception ${e.message} (which probably comes from a timeout while reading). " +
+                            "This happens after a while (about 2min), the GW just stops responding => retrying..."
+                )
+                error = "Received Exception ${e.message}"
+                gatewayConnection.reconnect()
+                relogin()
+                gatewayConnection.sendMessage(message)
             } catch (e: Exception) {
                 Logger.info("Received Exception ${e.message} => retrying...")
                 error = "Received Exception ${e.message}"
@@ -227,6 +266,16 @@ class ClientAPI(
 
         }
         throw IllegalStateException("Retry failed: $error")
+    }
+
+    /**
+     * Send without retry and error handling
+     */
+    private fun sendDirectly(messageToSend: BiPackage): BiPackage {
+        val message = messageToSend.copy(tag = getNewTag())
+        gatewayConnection.sendMessage(message)
+        val tc = gatewayConnection.readAnswer(message.tag)
+        return tc.pack
     }
 
     private fun getNewTag(): Int {
