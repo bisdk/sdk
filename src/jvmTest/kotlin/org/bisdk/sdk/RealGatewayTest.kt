@@ -85,4 +85,32 @@ internal class RealGatewayTest {
         Logger.info("Under 1s: $under1sec, Under 2s: $under2sec, Under 5s: $under5sec ")
     }
 
+    @Test
+    @Ignore // You need a real GW in your network for this test to work
+    fun testGetGroupsTiming() {
+        val discovery = Discovery()
+        val future = discovery.startServer()
+        discovery.sendDiscoveryRequest()
+        val discoveryData = future.join()
+        val client = GatewayConnection(address = discoveryData.sourceAddress, gatewayId =  discoveryData.getGatewayId())
+        val clientAPI = ClientAPI(client)
+        clientAPI.login("username", "password")
+        var i = 0
+        val times = mutableListOf<Long>()
+        val startTime = System.currentTimeMillis()
+        while (i++ < 200 ) {
+            val localStartTime = System.currentTimeMillis()
+            clientAPI.getGroups()
+            val localTimeElapsed = System.currentTimeMillis() - localStartTime
+            times.add(localTimeElapsed)
+        }
+        val timeElapsed = System.currentTimeMillis() - startTime
+        Logger.info("Total time " + timeElapsed + "ms")
+        Logger.info("Times: " + times)
+        val under1sec = times.filter { it < 1000 }.count()
+        val under2sec = times.filter { it < 2000 }.count()
+        val under5sec = times.filter { it < 5000 }.count()
+        Logger.info("Under 1s: $under1sec, Under 2s: $under2sec, Under 5s: $under5sec ")
+    }
+
 }
