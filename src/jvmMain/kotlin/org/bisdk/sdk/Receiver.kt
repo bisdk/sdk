@@ -16,9 +16,9 @@ class Receiver(private val dataIn: DataInputStream, private val readTimeout: Int
         running = false
     }
 
-    fun retrieveAnswer(tag: Int): TransportContainer {
+    fun retrieveAnswer(tag: Int, readTimeout: Int?): TransportContainer {
         Logger.debug("Waiting for answer with tag $tag")
-        waitFor(readTimeout, { queue.find { message -> message.pack.tag == tag } != null }, "PackageReceived")
+        waitFor(readTimeout ?: this.readTimeout, { queue.find { message -> message.pack.tag == tag } != null }, "PackageReceived")
         throwExceptionIfOccurred()
         val message = queue.find { message -> message.pack.tag == tag }!!
         queue.remove(message)

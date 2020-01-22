@@ -18,17 +18,18 @@ class GatewayConnection(
     private var senderId: String = defaultSenderId,
     private var receiverId: String,
     var token: String = defaultToken,
-    private val port: Int = 4000,
+    private val port: Int = defaultPort,
     /**
      * Timeout in ms before a send message request is aborted
      */
-    private val sendTimeout: Int = 2000,
+    private val sendTimeout: Int = defaultSendTimeout,
     /**
      * Timeout in ms before a read request is aborted.
-     * Tests have shown that there are some requests that need some more time to be fulfilled.
-     * An overall timeout must therefore be quite high, 15sec is probably a minimum.
+     * Tests have shown that most requests are quite fast, most under 1s. Some users reported timeouts when executing getGroups.
+     * An overall timeout can be very low, about 2s is ok for > 99% of the requests.
+     * Get groups get a special timeout, which is ok since it is called very seldom.
      */
-    private val readTimeout: Int = 2000,
+    private val readTimeout: Int = defaultReadTimeout,
     /**
      * Timeout in ms before a connection request is aborted
      */
@@ -41,9 +42,14 @@ class GatewayConnection(
      */
     constructor(address: InetAddress, gatewayId: String) : this(address, defaultSenderId, gatewayId, defaultToken)
 
+    constructor(address: InetAddress, gatewayId: String, readTimeout: Int) : this(address, defaultSenderId, gatewayId, defaultToken, defaultPort, defaultSendTimeout, readTimeout)
+
     companion object {
         const val defaultToken: String = "00000000"
         const val defaultSenderId: String = "000000000000"
+        const val defaultPort: Int = 4000
+        const val defaultSendTimeout: Int = 2000
+        const val defaultReadTimeout: Int = 2000
     }
 
     var s: Socket = Socket()
@@ -104,8 +110,8 @@ class GatewayConnection(
         sender.send(tc)
     }
 
-    fun readAnswer(tag: Int): TransportContainer {
-        val tc = receiver.retrieveAnswer(tag)
+    fun readAnswer(tag: Int, readTimeout: Int? = null): TransportContainer {
+        val tc = receiver.retrieveAnswer(tag, readTimeout)
         Logger.debug("Received: $tc")
         if (tc.pack.command == Command.LOGIN) {
             Logger.debug("Received answer of LOGIN command => setting senderId and token")

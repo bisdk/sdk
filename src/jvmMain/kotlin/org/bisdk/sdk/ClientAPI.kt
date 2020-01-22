@@ -39,6 +39,11 @@ class ClientAPI(
     private var password: String? = null
     private var tag = 0
 
+    /**
+     * Extended read timeout for getGroups
+     */
+    private val extendedTimeoutInMs = 5000
+
     fun getName(): String {
         val answer = sendWithRetry(BiPackage.fromCommandAndPayload(Command.GET_NAME, Payload.empty()))
         return answer.payload.getContentAsString()
@@ -139,14 +144,14 @@ class ClientAPI(
             BiPackage.fromCommandAndPayload(
                 command = Command.JMCP,
                 payload = Payload.getGroups()
-            )
+            ),
+            extendedTimeoutInMs
         )
         val json = answer.payload.getContentAsString()
         val mapper = ObjectMapper()
         mapper.registerModules(KotlinModule(), ParameterNamesModule())
         try {
-            val value = mapper.readValue<List<Group>>(json)
-            return value
+            return mapper.readValue(json)
         } catch (e: JsonProcessingException) {
             Logger.info("Could not deserialize Groups from $json, error: " + e.message + " -> retrying...")
             throw e
@@ -154,19 +159,25 @@ class ClientAPI(
     }
 
     /**
-     * This will return only the devices that are paired with the current user. We probably never will need this.
+     * This will return only the devices that are paired with the current user. We probably should always use this
      */
     fun getGroupsForUser(): List<Group> {
         val answer = sendWithRetry(
             BiPackage.fromCommandAndPayload(
                 command = Command.JMCP,
                 payload = Payload.getGroupsForUser()
-            )
+            ),
+            extendedTimeoutInMs
         )
         val json = answer.payload.getContentAsString()
         val mapper = ObjectMapper()
         mapper.registerModules(KotlinModule(), ParameterNamesModule())
-        return mapper.readValue(json)
+        try {
+            return mapper.readValue(json)
+        } catch (e: JsonProcessingException) {
+            Logger.info("Could not deserialize Groups from $json, error: " + e.message + " -> retrying...")
+            throw e
+        }
     }
 
     /**
@@ -199,8 +210,8 @@ class ClientAPI(
      *
      * It will retry certain times and try to handle special error conditions with a good retry / reconnect / relogin strategy
      */
-    private fun sendWithRetry(messageToSend: BiPackage): BiPackage {
-        val message = messageToSend.copy(tag = getNewTag())
+    private fun sendWithRetry(messageToSend: BiPackage, readTimeout: Int? = null): BiPackage {
+        var message = messageToSend.copy(tag = getNewTag())
         var sendCounter = 3L
         while (sendCounter-- > 0) {
             try {
@@ -210,23 +221,25 @@ class ClientAPI(
                 Logger.info("Received Exception ${e.message} => reconnecting...")
                 gatewayConnection.reconnect()
                 relogin()
-                Thread.sleep((4 - sendCounter) * 500) // Increase waiting time for each retry
+                Thread.sleep((4 - sendCounter) * 100) // Increase waiting time for each retry
             }
         }
         var error = "N/A"
         var i = 2L
         while (i-- > 0) {
             try {
-                val tc = gatewayConnection.readAnswer(message.tag)
+                val tc = gatewayConnection.readAnswer(message.tag, readTimeout)
                 val command = tc.pack.command
                 if (tc.pack.command == Command.ERROR && tc.pack.getBiError() != null && tc.pack.getBiError() == BiError.PERMISSION_DENIED) {
                     Logger.debug("Received PERMISSION_DENIED => relogin...")
                     relogin()
+                    message = messageToSend.copy(tag = getNewTag())  // try with new tag to see in log file which message was answered
                     gatewayConnection.sendMessage(message)
                     Thread.sleep(500)
                 } else if (command == Command.ERROR) {
                     Logger.info("Received ERROR answer => retrying...")
                     error = "Received ERROR answer"
+                    message = messageToSend.copy(tag = getNewTag())  // try with new tag to see in log file which message was answered
                     gatewayConnection.sendMessage(message)
                     Thread.sleep(500)
                 } else if (command == Command.EMPTY && i == 1L) {
@@ -234,6 +247,7 @@ class ClientAPI(
                     error = "Received EMPTY answer"
                     gatewayConnection.reconnect()
                     relogin()
+                    message = messageToSend.copy(tag = getNewTag())  // try with new tag to see in log file which message was answered
                     gatewayConnection.sendMessage(message)
                     Thread.sleep(500)
                 } else if (command == Command.EMPTY) {
@@ -247,6 +261,7 @@ class ClientAPI(
                 Logger.info("Received SocketException ${e.message} => reconnecting...")
                 gatewayConnection.reconnect()
                 relogin()
+                message = messageToSend.copy(tag = getNewTag())  // try with new tag to see in log file which message was answered
                 gatewayConnection.sendMessage(message)
                 Thread.sleep(500)
             } catch (e: IllegalStateException) {
@@ -257,6 +272,7 @@ class ClientAPI(
                 error = "Received Exception ${e.message}"
                 gatewayConnection.reconnect()
                 relogin()
+                message = messageToSend.copy(tag = getNewTag())  // try with new tag to see in log file which message was answered
                 gatewayConnection.sendMessage(message)
             } catch (e: Exception) {
                 Logger.info("Received Exception ${e.message} => retrying...")
