@@ -237,7 +237,7 @@ class ClientAPI(
                     gatewayConnection.sendMessage(message)
                     Thread.sleep(500)
                 } else if (command == Command.ERROR) {
-                    Logger.info("Received ERROR answer => retrying...")
+                    Logger.debug("Received ERROR (" + tc.pack.getBiError() + ") answer => retrying...")
                     error = "Received ERROR answer"
                     message = messageToSend.copy(tag = getNewTag())  // try with new tag to see in log file which message was answered
                     gatewayConnection.sendMessage(message)
@@ -251,7 +251,7 @@ class ClientAPI(
                     gatewayConnection.sendMessage(message)
                     Thread.sleep(500)
                 } else if (command == Command.EMPTY) {
-                    Logger.info("Received EMPTY answer => waiting...")
+                    Logger.debug("Received EMPTY answer => waiting...")
                     error = "Received EMPTY answer"
                     Thread.sleep(500)
                 } else {
