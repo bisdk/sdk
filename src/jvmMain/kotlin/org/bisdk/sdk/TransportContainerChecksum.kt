@@ -1,17 +1,22 @@
 package org.bisdk.sdk
 
-class TransportContainerChecksum(val tp: TransportContainer) {
+class TransportContainerChecksum() {
 
-    fun calculate(): Byte {
+    fun calculate(tp: TransportContainer): Byte {
+        val sender = tp.sender
+        val receiver = tp.receiver
+        val pack = tp.pack
+        return calculate(sender, receiver, pack)
+    }
+
+    fun calculate(sender: String, receiver: String, pack: BiPackage): Byte {
+        val str = sender + receiver + pack.toHexString()
         var value = 0
-        val str = getChecksumSource()
         str.forEach {
             value += it.toByte()
         }
         value = value and 255
         return value.toByte()
     }
-
-    fun getChecksumSource() = tp.sender + tp.receiver + tp.pack.toHexString()
 
 }
