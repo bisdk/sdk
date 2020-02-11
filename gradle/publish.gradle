@@ -29,6 +29,7 @@ task stubJavadoc(type: Jar) {
 publishing {
 
     repositories {
+        mavenLocal()
         maven {
             url  "https://dl.bintray.com/bisdk/maven"
         }
