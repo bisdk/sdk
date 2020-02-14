@@ -47,7 +47,7 @@ internal class RealGatewayTest {
 
         val client = GatewayConnection(discoveryData.sourceAddress, "000000000000", discoveryData.getGatewayId())
         val clientAPI = ClientAPI(client)
-        var i : Int = 0
+        var i: Int = 0
         val startTime = System.currentTimeMillis()
         while (i++ < 1000 && clientAPI.ping()) {
             Thread.sleep(1000)
@@ -63,16 +63,21 @@ internal class RealGatewayTest {
         val future = discovery.startServer()
         discovery.sendDiscoveryRequest()
         val discoveryData = future.join()
-        val client = GatewayConnection(address = discoveryData.sourceAddress, gatewayId =  discoveryData.getGatewayId())
+        val client = GatewayConnection(address = discoveryData.sourceAddress, gatewayId = discoveryData.getGatewayId())
         val clientAPI = ClientAPI(client)
         clientAPI.login("username", "password")
         val groups = clientAPI.getGroups()
         var i = 0
         val times = mutableListOf<Long>()
+        var errors = 0
         val startTime = System.currentTimeMillis()
-        while (i++ < 200 ) {
+        while (i++ < 200) {
             val localStartTime = System.currentTimeMillis()
-            clientAPI.getTransition(groups[0].ports[0])
+            try {
+                clientAPI.getTransition(groups[0].ports[0])
+            } catch (e: Exception) {
+                errors++
+            }
             val localTimeElapsed = System.currentTimeMillis() - localStartTime
             times.add(localTimeElapsed)
         }
@@ -82,7 +87,7 @@ internal class RealGatewayTest {
         val under1sec = times.filter { it < 1000 }.count()
         val under2sec = times.filter { it < 2000 }.count()
         val under5sec = times.filter { it < 5000 }.count()
-        Logger.info("Under 1s: $under1sec, Under 2s: $under2sec, Under 5s: $under5sec ")
+        Logger.info("Under 1s: $under1sec, Under 2s: $under2sec, Under 5s: $under5sec, errors: $errors ")
     }
 
     @Test
@@ -92,15 +97,20 @@ internal class RealGatewayTest {
         val future = discovery.startServer()
         discovery.sendDiscoveryRequest()
         val discoveryData = future.join()
-        val client = GatewayConnection(address = discoveryData.sourceAddress, gatewayId =  discoveryData.getGatewayId())
+        val client = GatewayConnection(address = discoveryData.sourceAddress, gatewayId = discoveryData.getGatewayId())
         val clientAPI = ClientAPI(client)
         clientAPI.login("username", "password")
         var i = 0
         val times = mutableListOf<Long>()
+        var errors = 0
         val startTime = System.currentTimeMillis()
-        while (i++ < 200 ) {
+        while (i++ < 200) {
             val localStartTime = System.currentTimeMillis()
-            clientAPI.getGroups()
+            try {
+                clientAPI.getGroups()
+            } catch (e: Exception) {
+                errors++
+            }
             val localTimeElapsed = System.currentTimeMillis() - localStartTime
             times.add(localTimeElapsed)
         }
@@ -110,7 +120,7 @@ internal class RealGatewayTest {
         val under1sec = times.filter { it < 1000 }.count()
         val under2sec = times.filter { it < 2000 }.count()
         val under5sec = times.filter { it < 5000 }.count()
-        Logger.info("Under 1s: $under1sec, Under 2s: $under2sec, Under 5s: $under5sec ")
+        Logger.info("Under 1s: $under1sec, Under 2s: $under2sec, Under 5s: $under5sec, errors: $errors ")
     }
 
 }
