@@ -34,8 +34,12 @@ class Sender(private val dataOut: DataOutputStream, private val sendTimeout: Int
 
     override fun run() {
         while (running) {
-            while (queue.isEmpty()) {
+            while (running && queue.isEmpty()) {
                 Thread.sleep(50)
+            }
+            // If we were stopped in the meantime, return here
+            if(!running) {
+                return
             }
             val message = queue[0]
             val messageBytes = message.toByteArray().encodeToGW()

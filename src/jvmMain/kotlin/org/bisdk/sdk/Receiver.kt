@@ -48,8 +48,12 @@ class Receiver(private val dataIn: DataInputStream, private val readTimeout: Int
         val bytesRead = ArrayList<Byte>()
         Logger.debug("Reading from socket...")
         try {
-            while (dataIn.available() == 0) {
+            while (running && dataIn.available() == 0) {
                 Thread.sleep(50)
+            }
+            // If we were stopped in the meantime, return here
+            if(!running) {
+                return ByteArray(0)
             }
         } catch (e: IOException) {
             exception = e
@@ -59,8 +63,8 @@ class Receiver(private val dataIn: DataInputStream, private val readTimeout: Int
         // We have to wait for all bytes a really long time. 5sec should hopefully be enough...
         // Otherwise we would need to read all bytes always and check always if we have a complete package
         val startTime = System.currentTimeMillis()
-        while (System.currentTimeMillis() < (startTime + readTimeout)) {
-            while (dataIn.available() > 0) {
+        while (running && System.currentTimeMillis() < (startTime + readTimeout)) {
+            while (running && dataIn.available() > 0) {
                 try {
                     bytesRead.add(dataIn.readUnsignedByte().toByte())
                 } catch (e: IOException) {
@@ -82,7 +86,7 @@ class Receiver(private val dataIn: DataInputStream, private val readTimeout: Int
                     }
                 }
             }
-            if (dataIn.available() == 0) {
+            if (running && dataIn.available() == 0) {
                 Thread.sleep(100)
             }
         }
