@@ -18,7 +18,7 @@ class Receiver(private val dataIn: DataInputStream, private val readTimeout: Int
 
     fun retrieveAnswer(tag: Int, readTimeout: Int?): TransportContainer {
         Logger.debug("Waiting for answer with tag $tag")
-        waitFor(readTimeout ?: this.readTimeout, { queue.find { message -> message.pack.tag == tag } != null }, "PackageReceived")
+        waitFor(readTimeout ?: this.readTimeout, { (queue.find { message -> message.pack.tag == tag } != null) || (exception != null) }, "PackageReceived")
         throwExceptionIfOccurred()
         val message = queue.find { message -> message.pack.tag == tag }!!
         queue.remove(message)
@@ -57,7 +57,8 @@ class Receiver(private val dataIn: DataInputStream, private val readTimeout: Int
             }
         } catch (e: IOException) {
             exception = e
-            Logger.debug("Received exception while waiting for bytes: $e")
+            Logger.debug("Stopping receiver thread, we received exception while waiting for bytes: $e")
+            running = false // We stop running, when exception occured
             return ByteArray(0)
         }
         // We have to wait for all bytes a really long time. 5sec should hopefully be enough...
