@@ -50,6 +50,11 @@ Currently working:
 - You should use a different username / password for each client that connects to the gateway. If you for example use the BiSecure Smartphone App, you should not use the same credentials here in the lib.
 - The gateway stops responding after some time, about after 2 or 3 min. Therefore the ClientAPI will reconnect to the gateway again and login again if a timeout occurs. That leads to some requests take much more time than others.
 
+## Local Development
+### Install as Maven Dependency
+    ./gradlew build
+    mvn install:install-file -Dfile=build/libs/sdk-jvm-0.0.2-SNAPSHOT.jar -DpomFile=build/publications/jvm/pom-default.xml 
+
 ## Protocol
 This is the result of the Reverse Engineering of the App &lt;-> BiSecure Gateway Protocol
 It is the attempt to reverse engineer the protocol between the hoermann bisecure gateway and the corresponding app.

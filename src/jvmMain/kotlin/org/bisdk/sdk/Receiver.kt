@@ -13,17 +13,29 @@ class Receiver(private val dataIn: DataInputStream, private val readTimeout: Int
     private var running = true
 
     public fun stop() {
+        queue.clear()
         running = false
     }
 
     fun retrieveAnswer(tag: Int, readTimeout: Int?): TransportContainer {
         Logger.debug("Waiting for answer with tag $tag")
-        waitFor(readTimeout ?: this.readTimeout, { (queue.find { message -> message.pack.tag == tag } != null) || (exception != null) }, "PackageReceived")
+        waitFor(readTimeout ?: this.readTimeout, {
+            (queue.find { message -> message.pack.tag == tag } != null) ||
+                    (exception != null) ||
+                    !running
+        }, "PackageReceived")
+        throwExceptionIfNoLongerRunning()
         throwExceptionIfOccurred()
         val message = queue.find { message -> message.pack.tag == tag }!!
         queue.remove(message)
         Logger.debug("Answer for tag $tag: $message")
         return message
+    }
+
+    private fun throwExceptionIfNoLongerRunning() {
+        if (!running) {
+            throw InterruptedException("Receiver got signal to stop -> stopping receiving activities ")
+        }
     }
 
     private fun throwExceptionIfOccurred() {
@@ -52,7 +64,7 @@ class Receiver(private val dataIn: DataInputStream, private val readTimeout: Int
                 Thread.sleep(50)
             }
             // If we were stopped in the meantime, return here
-            if(!running) {
+            if (!running) {
                 return ByteArray(0)
             }
         } catch (e: IOException) {
