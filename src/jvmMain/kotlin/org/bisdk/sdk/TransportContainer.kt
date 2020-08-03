@@ -1,9 +1,6 @@
 package org.bisdk.sdk
 
-import org.bisdk.Lengths
-import org.bisdk.toByteArray
-import org.bisdk.toHexByteArray
-import org.bisdk.toHexString
+import org.bisdk.*
 
 /**
  * All messages (Packages) are encapsulated inside a transport container. It defines the sender, receiver and a checksum.
@@ -37,7 +34,11 @@ class TransportContainer(
             val biPackage = ba.copyOfRange(Lengths.ADDRESS_BYTES * 2, ba.size - Lengths.CHECKSUM_BYTES)
 //            Logger.debug("sender: $sender, receiver: $receiver, biPackage: ${biPackage.toHexString()}")
             val pack = BiPackage.from(biPackage)
-            val checksum = ba.copyOfRange(ba.size - Lengths.CHECKSUM_BYTES, ba.size).toHexString().toInt(16).toByte()
+            if(pack.command == Command.EMPTY) {
+                // EMPTY command => we do not even check last checksum
+                return TransportContainer(sender, receiver, pack, 0)
+            }
+            val checksum = ba.copyOfRange(Lengths.ADDRESS_BYTES * 2 + pack.getLength(), Lengths.ADDRESS_BYTES * 2 + pack.getLength() + Lengths.CHECKSUM_BYTES).toHexString().toInt(16).toByte()
             return TransportContainer(sender, receiver, pack, checksum)
         }
 

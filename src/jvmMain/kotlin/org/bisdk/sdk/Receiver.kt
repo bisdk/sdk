@@ -89,8 +89,8 @@ class Receiver(private val dataIn: DataInputStream, private val readTimeout: Int
                     (0..(bytesRead.size - tcMinimalLength)).forEach {
                         val ba = bytesRead.subList(it, bytesRead.size).toByteArray().decodeFromGW()
                         val tc = TransportContainer.from(ba)
-                        if (tc.pack.command != Command.EMPTY) {
-//                            Logger.debug("Checking " + ba.toHexString())
+                        if (tc.pack.command == Command.EMPTY) {  // TOO much noise
+//                            Logger.debug("Empty / unreadable answer received: " + ba.toHexString())
                         }
                         if (tc.hasCorrectChecksum() && tc.pack.command != Command.EMPTY) {
                             Logger.debug("Received from socket: " + ba.toHexString())

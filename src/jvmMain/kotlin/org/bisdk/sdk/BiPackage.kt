@@ -102,12 +102,12 @@ data class BiPackage(
 //            Logger.debug("length: $lengthHexString, tag: $tagHexString, token: $token, command: $commandHexString ($command)")
             val payloadLength =
                 length - Lengths.LENGTH_BYTES - Lengths.TAG_BYTES - Lengths.TOKEN_BYTES - Lengths.COMMAND_BYTES - Lengths.CHECKSUM_BYTES
-            if (payloadLength < 0 || ba.size < idx + payloadLength) {
+            if (payloadLength < 0 || ba.size < length) {
                 return empty()
             }
 //            Logger.debug("ba.size: ${ba.size}, idx: $idx, Payload length: $payloadLength")
             val payloadBytes = ba.copyOfRange(idx, idx + payloadLength)
-            val checksum = ba[ba.lastIndex]
+            val checksum = ba[idx + payloadLength]
 //            Logger.debug("Payload: ${payloadBytes.toHexString()} Checksum: ${checksum.toHexString()}")
             val biPackage = BiPackage(command, tag, token, Payload(payloadBytes), isResponse, checksum)
 //            Logger.debug("Parsed BiPackage: ${biPackage.toHexString()}")
