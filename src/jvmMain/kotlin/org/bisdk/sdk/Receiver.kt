@@ -65,6 +65,7 @@ class Receiver(private val dataIn: DataInputStream, private val readTimeout: Int
             }
             // If we were stopped in the meantime, return here
             if (!running) {
+                Logger.debug("Stopping receiver thread.")
                 return ByteArray(0)
             }
         } catch (e: IOException) {

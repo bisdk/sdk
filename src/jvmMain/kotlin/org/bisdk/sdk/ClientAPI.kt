@@ -39,11 +39,6 @@ class ClientAPI(
     private var password: String? = null
     private var tag = 0
 
-    /**
-     * Extended read timeout for getGroups
-     */
-    private val extendedTimeoutInMs = 5000
-
     fun getName(): String {
         val answer = sendWithRetry(BiPackage.fromCommandAndPayload(Command.GET_NAME, Payload.empty()))
         return answer.payload.getContentAsString()
@@ -144,8 +139,7 @@ class ClientAPI(
             BiPackage.fromCommandAndPayload(
                 command = Command.JMCP,
                 payload = Payload.getGroups()
-            ),
-            extendedTimeoutInMs
+            )
         )
         val json = answer.payload.getContentAsString()
         val mapper = ObjectMapper()
@@ -166,8 +160,7 @@ class ClientAPI(
             BiPackage.fromCommandAndPayload(
                 command = Command.JMCP,
                 payload = Payload.getGroupsForUser()
-            ),
-            extendedTimeoutInMs
+            )
         )
         val json = answer.payload.getContentAsString()
         val mapper = ObjectMapper()
@@ -210,7 +203,7 @@ class ClientAPI(
      *
      * It will retry certain times and try to handle special error conditions with a good retry / reconnect / relogin strategy
      */
-    private fun sendWithRetry(messageToSend: BiPackage, readTimeout: Int? = null): BiPackage {
+    private fun sendWithRetry(messageToSend: BiPackage): BiPackage {
         var message = messageToSend.copy(tag = getNewTag())
         var sendCounter = 3L
         while (sendCounter-- > 0) {
@@ -228,7 +221,7 @@ class ClientAPI(
         var i = 2L
         while (i-- > 0) {
             try {
-                val tc = gatewayConnection.readAnswer(message.tag, readTimeout)
+                val tc = gatewayConnection.readAnswer(message.tag)
                 val command = tc.pack.command
                 if (tc.pack.command == Command.ERROR && tc.pack.getBiError() != null && tc.pack.getBiError() == BiError.PERMISSION_DENIED) {
                     Logger.debug("Received PERMISSION_DENIED => relogin...")

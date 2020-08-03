@@ -99,4 +99,11 @@ internal class TransportContainerKtTest {
         assertThat(pack.checksum).describedAs("Correct pack checksum").isEqualTo(pack.calculatedChecksum)
         assertThat(tc.checksum).describedAs("Correct tc checksum").isEqualTo(tc.calculatedChecksum)
     }
+
+//    @Test
+//    fun testTest() {
+//        val tc = TransportContainer.from("5410EC4FEEB9000000000006007E0701EC25B1865B7B226964223A302C226E616D65223A22476172617A73616A746F222C2270".toHexByteArray())
+//        assertThat(tc).isNotNull
+//        assertThat(tc.pack.command).isNotEqualTo(Command.EMPTY)
+//    }
 }
