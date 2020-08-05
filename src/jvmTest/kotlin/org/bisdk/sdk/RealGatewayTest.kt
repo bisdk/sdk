@@ -14,7 +14,7 @@ internal class RealGatewayTest {
      *  </ul>
      */
     @Test
-    @Ignore // You need a real GW in your network for this test to work
+//    @Ignore // You need a real GW in your network for this test to work
     fun testStartup() {
         val discovery = Discovery()
         val future = discovery.startServer()
@@ -26,7 +26,7 @@ internal class RealGatewayTest {
         println("Name: " + clientAPI.getName())
         println("Ping: " + clientAPI.ping())
         println("Login in...")
-        clientAPI.login("username", "password")
+        clientAPI.login("openhab", "openhab")
         val state = clientAPI.getState()
         println("State: $state")
         val groups = clientAPI.getGroups()

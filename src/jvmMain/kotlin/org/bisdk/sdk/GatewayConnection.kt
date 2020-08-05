@@ -49,7 +49,7 @@ class GatewayConnection(
         const val defaultSenderId: String = "000000000000"
         const val defaultPort: Int = 4000
         const val defaultSendTimeout: Int = 2000
-        const val defaultReadTimeout: Int = 2000
+        const val defaultReadTimeout: Int = 5000
     }
 
     var s: Socket = Socket()
@@ -110,8 +110,8 @@ class GatewayConnection(
         sender.send(tc)
     }
 
-    fun readAnswer(tag: Int, readTimeout: Int? = null): TransportContainer {
-        val tc = receiver.retrieveAnswer(tag, readTimeout)
+    fun readAnswer(tag: Int): TransportContainer {
+        val tc = receiver.retrieveAnswer(tag)
         Logger.debug("Received: $tc")
         if (tc.pack.command == Command.LOGIN) {
             Logger.debug("Received answer of LOGIN command => setting senderId and token")

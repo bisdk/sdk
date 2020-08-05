@@ -20,7 +20,7 @@ class TransportContainer(
 
     fun toHexString() = sender + receiver + pack.toHexString() + checksum.toHexString()
 
-    fun size() = toByteArray().size / 2
+    fun length() = Lengths.ADDRESS_BYTES * 2 + pack.getLength() + Lengths.CHECKSUM_BYTES
 
     override fun toString() = "sender: $sender, receiver: $receiver, pack: $pack, checksum: ${checksum.toHexString()}"
 
@@ -29,16 +29,20 @@ class TransportContainer(
             if (ba.size < Lengths.ADDRESS_BYTES * 2) {
                 throw IllegalArgumentException("Wrong size: " + ba.toHexString())
             }
-            val sender = ba.copyOfRange(0, Lengths.ADDRESS_BYTES).toHexString()
-            val receiver = ba.copyOfRange(Lengths.ADDRESS_BYTES, Lengths.ADDRESS_BYTES * 2).toHexString()
-            val biPackage = ba.copyOfRange(Lengths.ADDRESS_BYTES * 2, ba.size - Lengths.CHECKSUM_BYTES)
-//            Logger.debug("sender: $sender, receiver: $receiver, biPackage: ${biPackage.toHexString()}")
+            var idx = 0
+            val sender = ba.copyOfRange(idx, Lengths.ADDRESS_BYTES).toHexString()
+            idx += Lengths.ADDRESS_BYTES
+            val receiver = ba.copyOfRange(idx, Lengths.ADDRESS_BYTES * 2).toHexString()
+            idx += Lengths.ADDRESS_BYTES
+            val biPackage = ba.copyOfRange(idx, ba.size - Lengths.CHECKSUM_BYTES)
             val pack = BiPackage.from(biPackage)
-            if(pack.command == Command.EMPTY) {
-                // EMPTY command => we do not even check last checksum
+            if (pack.command == Command.EMPTY) {
+                // EMPTY command means we could not parse the package correctly => we do not even check last checksum
                 return TransportContainer(sender, receiver, pack, 0)
             }
-            val checksum = ba.copyOfRange(Lengths.ADDRESS_BYTES * 2 + pack.getLength(), Lengths.ADDRESS_BYTES * 2 + pack.getLength() + Lengths.CHECKSUM_BYTES).toHexString().toInt(16).toByte()
+            idx += pack.getLength()  // We use the real length of the package here, not the total length of all bytes read
+            val checksum = ba.copyOfRange(idx, idx + Lengths.CHECKSUM_BYTES).toHexString().toInt(16).toByte()
+            Logger.debug("TC length: " + (idx + Lengths.CHECKSUM_BYTES))
             return TransportContainer(sender, receiver, pack, checksum)
         }
 

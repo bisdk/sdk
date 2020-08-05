@@ -151,4 +151,4 @@ As a result I set the timeout for waiting for a response to 2s, that should be e
      
 ### Deployment to local Maven Repo
 
-    mvn install:install-file -Dfile=build/libs/sdk-jvm-0.0.2-SNAPSHOT.jar -DpomFile=build/publications/jvm/pom-default.xml
+    ./gradlew publishToMavenLocal

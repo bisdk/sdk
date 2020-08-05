@@ -4,7 +4,7 @@ import kotlinx.io.errors.IOException
 import org.bisdk.Command
 import org.bisdk.Lengths
 import org.bisdk.decodeFromGW
-import org.bisdk.toHexString
+import org.bisdk.toHexStringFromGW
 import java.io.DataInputStream
 
 class Receiver(private val dataIn: DataInputStream, private val readTimeout: Int) : Runnable {
@@ -17,9 +17,9 @@ class Receiver(private val dataIn: DataInputStream, private val readTimeout: Int
         running = false
     }
 
-    fun retrieveAnswer(tag: Int, readTimeout: Int?): TransportContainer {
+    fun retrieveAnswer(tag: Int): TransportContainer {
         Logger.debug("Waiting for answer with tag $tag")
-        waitFor(readTimeout ?: this.readTimeout, {
+        waitFor(readTimeout, {
             (queue.find { message -> message.pack.tag == tag } != null) ||
                     (exception != null) ||
                     !running
@@ -46,74 +46,57 @@ class Receiver(private val dataIn: DataInputStream, private val readTimeout: Int
         }
     }
 
-    private fun readAnswer() {
-        val ba = readBytes()
-        if (ba.isEmpty()) {
-            return
-        }
-        val tc = TransportContainer.from(ba)
-        Logger.debug("Received: $tc")
-        queue.add(tc)
-    }
-
-    private fun readBytes(): ByteArray {
+    private fun readIncomingPackages() {
         val bytesRead = ArrayList<Byte>()
+        var startTime = System.currentTimeMillis()
         Logger.debug("Reading from socket...")
-        try {
-            while (running && dataIn.available() == 0) {
-                Thread.sleep(50)
-            }
-            // If we were stopped in the meantime, return here
-            if (!running) {
-                Logger.debug("Stopping receiver thread.")
-                return ByteArray(0)
-            }
-        } catch (e: IOException) {
-            exception = e
-            Logger.debug("Stopping receiver thread, we received exception while waiting for bytes: $e")
-            running = false // We stop running, when exception occured
-            return ByteArray(0)
-        }
-        // We have to wait for all bytes a really long time. 5sec should hopefully be enough...
-        // Otherwise we would need to read all bytes always and check always if we have a complete package
-        val startTime = System.currentTimeMillis()
-        while (running && System.currentTimeMillis() < (startTime + readTimeout)) {
-            while (running && dataIn.available() > 0) {
+        while (running) {
+            if (dataIn.available() > 0) {
                 try {
-                    bytesRead.add(dataIn.readUnsignedByte().toByte())
+                    while(dataIn.available() > 0) {
+                        bytesRead.add(dataIn.readUnsignedByte().toByte())
+                    }
                 } catch (e: IOException) {
                     exception = e
                 }
-                val tcMinimalLength = Lengths.Companion.ADDRESS_SIZE * 2 + Lengths.CHECKSUM_BYTES
-                if (bytesRead.size > tcMinimalLength) {  // Only if it contains sender and receiver address
+                if (bytesRead.size >= Lengths.MINIMUM_CONTAINER_SIZE) {  // Only if it contains sender and receiver address
+                    Logger.debug("Checking " + bytesRead.toByteArray().toHexStringFromGW())
                     // Perhaps we have some wrong bytes received from the network, we check if we have a valid response without some of the first bytes
-                    (0..(bytesRead.size - tcMinimalLength)).forEach {
-                        val ba = bytesRead.subList(it, bytesRead.size).toByteArray().decodeFromGW()
+                    for (startPos in 0..(bytesRead.size - Lengths.MINIMUM_CONTAINER_SIZE)) {
+//                        Logger.debug("startPos: $startPos, bytesReadSize: ${bytesRead.size}")
+                        val ba = bytesRead.subList(startPos, bytesRead.size).toByteArray().decodeFromGW()
                         val tc = TransportContainer.from(ba)
                         if (tc.pack.command == Command.EMPTY) {  // TOO much noise
 //                            Logger.debug("Empty / unreadable answer received: " + ba.toHexString())
                         }
                         if (tc.hasCorrectChecksum() && tc.pack.command != Command.EMPTY) {
-                            Logger.debug("Received from socket: " + ba.toHexString())
-                            return ba
+                            if (startPos > 0) {
+                                Logger.debug("Ignoring first $startPos bytes: " + bytesRead.subList(0, startPos).toByteArray().toHexStringFromGW())
+                            }
+                            Logger.debug("Received: $tc in " + (System.currentTimeMillis() - startTime) + "ms")
+                            queue.add(tc)
+                            if(startPos > 0 || (tc.length() * 2) < (bytesRead.size - startPos)) {
+                                Logger.debug("Remaining bytes found startPos: $startPos, tc.size(): ${tc.length() * 2}, bytesRead.size: ${bytesRead.size} => saving...")
+                                val remainingBytes = bytesRead.subList(startPos, tc.length() * 2)
+                                bytesRead.clear()
+                                bytesRead.addAll(remainingBytes)
+                            } else {
+                                bytesRead.clear()
+                            }
+                            startTime = System.currentTimeMillis()
+                            break
                         }
                     }
                 }
-            }
-            if (running && dataIn.available() == 0) {
+            } else {
                 Thread.sleep(100)
             }
         }
-        Logger.debug("No correct value received from socket!")
-        Logger.debug("Received: " + bytesRead.toByteArray().decodeFromGW().toHexString())
-
-        return ByteArray(0)
+        Logger.debug("End of reading Thread!")
     }
 
     override fun run() {
-        while (running) {
-            readAnswer()
-        }
+        readIncomingPackages()
     }
 
 }
