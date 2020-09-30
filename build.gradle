@@ -88,6 +88,9 @@ kotlin {
             }
         }
         macosMain {
+            dependencies {
+                implementation "org.jetbrains.kotlinx:kotlinx-io-macosx64:$kotlinx_io_version"
+            }
         }
         macosTest {
         }
