@@ -55,9 +55,27 @@ Currently working:
     ./gradlew build
     mvn install:install-file -Dfile=build/libs/sdk-jvm-0.0.2-SNAPSHOT.jar -DpomFile=build/publications/jvm/pom-default.xml 
 
+### Tested Environments
+    Ubuntu 18.04.5 Server
+    - sudo apt install openjdk-8-jdk
+    - git clone repository
+    - ./gradlew build
+
+### Simple Test (Needs a real gateway available in the network)
+    0. Recommended to create a second user in the App and use that to login.
+    1. Set your username and password
+        set env variable
+        export "bisecureUsername=<yourusername>"
+        export "bisecurePassword=<yourpassword>"
+    2. Run ./gradlew clean jvmTest --tests RealGatewayTest -i
+        This runs src/jvmTest/kotlin/org/bisdk/sdk/RealGatewayTest.kt
+    3. The test will print all interactions with the gateway.
+
+# Analysis
+
 ## Protocol
 This is the result of the Reverse Engineering of the App &lt;-> BiSecure Gateway Protocol
-It is the attempt to reverse engineer the protocol between the hoermann bisecure gateway and the corresponding app.
+It is the attempt to reverse engineer the protocol between the Hoermann BiSecure gateway and the corresponding app.
 
 The goal is to be able to build an adapter for home automation system to control the garage doors from the automation software. Especially to be able to get the door open when you drive home automatically.
 
@@ -129,7 +147,7 @@ The Sequence is:
 ### Time out of Responses
 
 The gateway responds quite quickly to a request and there are only a few exceptions.
-Sometime it does not respond at all, only a reconnect and retry works then.
+Sometimes it does not respond at all, only a reconnect and retry works then.
 
 Example (199 x GetTransition):
 2020-01-20T19:23:37.266 INFO: Times (ms): [655, 654, 654, 654, 654, 604, 654, 705, 605, 655, 660, 705, 654, 654, 704, 654, 653, 704, 2917, 652, 703, 653, 653, 653, 704, 704, 653, 652, 703, 653, 653, 653, 653, 652, 653, 652, 653, 652, 653, 652, 652, 655, 652, 652, 653, 652, 652, 655, 603, 652, 653, 602, 652, 652, 653, 652, 653, 652, 602, 653, 652, 653, 652, 656, 602, 652, 653, 602, 652, 603, 652, 602, 602, 602, 653, 653, 602, 602, 703, 652, 652, 702, 703, 652, 653, 702, 653, 702, 703, 652, 652, 702, 703, 652, 702, 703, 652, 652, 703, 652, 702, 652, 652, 653, 652, 651, 653, 652, 702, 652, 651, 651, 652, 702, 652, 652, 652, 657, 702, 652, 702, 702, 652, 702, 657, 1103, 653, 652, 5947, 652, 652, 651, 602, 654, 658, 652, 702, 652, 652, 706, 652, 652, 702, 652, 652, 652, 703, 652, 652, 703, 652, 652, 652, 652, 652, 652, 653, 1102, 652, 657, 652, 652, 653, 601, 652, 602, 652, 652, 602, 652, 652, 652, 652, 652, 652, 652, 652, 653, 652, 652, 652, 652, 602, 652, 652, 652, 653, 652, 652, 602, 652, 652, 602, 652, 652, 652, 602, 652, 652, 602]
