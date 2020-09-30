@@ -6,16 +6,24 @@ import org.junit.Test
 internal class RealGatewayTest {
 
     /**
+     * For this test to work you will need a real GW in your network
+     * with the username and password set in your environment variables
+     *
      * The startup flow:
      * <ul>
      *     <li>Discovery of gateway</li>
      *     <li>Get Name</li>
      *     <li>Login</li>
+     *     <li>Logout</li>
      *  </ul>
      */
     @Test
 //    @Ignore // You need a real GW in your network for this test to work
     fun testStartup() {
+
+        val username: String = System.getenv("bisecureUsername") ?: "openhab"
+        val password: String = System.getenv("bisecurePassword") ?: "openhab"
+
         val discovery = Discovery()
         val future = discovery.startServer()
         discovery.sendDiscoveryRequest()
@@ -26,7 +34,7 @@ internal class RealGatewayTest {
         println("Name: " + clientAPI.getName())
         println("Ping: " + clientAPI.ping())
         println("Login in...")
-        clientAPI.login("openhab", "openhab")
+        clientAPI.login(username, password)
         val state = clientAPI.getState()
         println("State: $state")
         val groups = clientAPI.getGroups()
