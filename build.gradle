@@ -40,11 +40,6 @@ kotlin {
                 }
             }
         }
-
-        // For ARM, preset should be changed to presets.iosArm32 or presets.iosArm64
-        // For Linux, preset should be changed to e.g. presets.linuxX64
-        // For MacOS, preset should be changed to e.g. presets.macosX64
-        fromPreset(presets.macosX64, 'macos')
     }
     sourceSets {
         commonMain {
@@ -87,16 +82,8 @@ kotlin {
                 implementation 'org.jetbrains.kotlin:kotlin-test-js'
             }
         }
-        macosMain {
-            dependencies {
-                implementation "org.jetbrains.kotlinx:kotlinx-io-macosx64:$kotlinx_io_version"
-            }
-        }
-        macosTest {
-        }
     }
 }
-
 
 apply from: rootProject.file("gradle/publish.gradle")
 apply from: rootProject.file('gradle/node-js.gradle')
