@@ -14,7 +14,7 @@ internal class RealGatewayTest {
     @Before
     fun setup() {
         username = System.getenv("bisecureUsername") ?: ""
-        password = System.getenv("bisecurePassword") ?: ""
+        password = System.getenv("bisecurePassword") ?: "test"
         ignoreTests = username.isEmpty()
     }
 
