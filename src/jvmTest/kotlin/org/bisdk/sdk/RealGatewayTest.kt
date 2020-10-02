@@ -1,9 +1,22 @@
 package org.bisdk.sdk
 
-import org.junit.Ignore
+import org.junit.Before
 import org.junit.Test
 
 internal class RealGatewayTest {
+
+    // TODO: migrate to unit5 and have conditional test
+    // @EnabledIfEnvironmentVariable(named = "bisecureUsername", matches = ".+")
+    private var ignoreTests: Boolean = false
+    private lateinit var username: String
+    private lateinit var password: String
+
+    @Before
+    fun setup() {
+        username = System.getenv("bisecureUsername") ?: ""
+        password = System.getenv("bisecurePassword") ?: ""
+        ignoreTests = username.isEmpty()
+    }
 
     /**
      * For this test to work you will need a real GW in your network
@@ -18,11 +31,10 @@ internal class RealGatewayTest {
      *  </ul>
      */
     @Test
-//    @Ignore // You need a real GW in your network for this test to work
     fun testStartup() {
-
-        val username: String = System.getenv("bisecureUsername") ?: "openhab"
-        val password: String = System.getenv("bisecurePassword") ?: "openhab"
+        if (ignoreTests) {
+            return
+        }
 
         val discovery = Discovery()
         val future = discovery.startServer()
@@ -46,8 +58,10 @@ internal class RealGatewayTest {
     }
 
     @Test
-    @Ignore // You need a real GW in your network for this test to work
     fun testPing() {
+        if (ignoreTests) {
+            return
+        }
         val discovery = Discovery()
         val future = discovery.startServer()
         discovery.sendDiscoveryRequest()
@@ -65,8 +79,10 @@ internal class RealGatewayTest {
     }
 
     @Test
-    @Ignore // You need a real GW in your network for this test to work
     fun testGetTransitionTiming() {
+        if (ignoreTests) {
+            return
+        }
         val discovery = Discovery()
         val future = discovery.startServer()
         discovery.sendDiscoveryRequest()
@@ -99,8 +115,10 @@ internal class RealGatewayTest {
     }
 
     @Test
-    @Ignore // You need a real GW in your network for this test to work
     fun testGetGroupsTiming() {
+        if (ignoreTests) {
+            return
+        }
         val discovery = Discovery()
         val future = discovery.startServer()
         discovery.sendDiscoveryRequest()
