@@ -170,3 +170,7 @@ As a result I set the timeout for waiting for a response to 2s, that should be e
 ### Deployment to local Maven Repo
 
     ./gradlew publishToMavenLocal
+
+# Other Related Projects
+
+https://github.com/skelsec/pysecur3
