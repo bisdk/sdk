@@ -1,5 +1,6 @@
 package org.bisdk.sdk
 
+import org.bisdk.Logger
 import org.bisdk.encodeToGW
 import org.bisdk.waitFor
 import java.io.DataOutputStream

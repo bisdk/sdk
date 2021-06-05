@@ -1,6 +1,7 @@
-package org.bisdk.sdk
+package org.bisdk
 
-import java.time.LocalDateTime
+import kotlinx.datetime.Clock
+
 
 /**
  * Abstraction of a basic logger to be used by external applications.
@@ -14,12 +15,15 @@ class Logger {
         fun setLoggerAdapter(newLoggerAdapter: LoggerAdapter) {
             internalAdapter = newLoggerAdapter
         }
+
         fun debug(message: String) {
             internalAdapter.debug(message)
         }
+
         fun info(message: String) {
             internalAdapter.info(message)
         }
+
         fun warn(message: String) {
             internalAdapter.warn(message)
         }
@@ -28,15 +32,15 @@ class Logger {
 
 class PrintlnAdapter : LoggerAdapter {
     override fun debug(message: String) {
-        println(LocalDateTime.now().toString() + " DEBUG: " + message)
+        println(Clock.System.now().toString() + " DEBUG: " + message)
     }
 
     override fun info(message: String) {
-        println(LocalDateTime.now().toString() + " INFO: " + message)
+        println(Clock.System.now().toString() + " INFO: " + message)
     }
 
     override fun warn(message: String) {
-        println(LocalDateTime.now().toString() + " WARN: " + message)
+        println(Clock.System.now().toString() + " WARN: " + message)
     }
 }
 

@@ -8,6 +8,7 @@ import com.fasterxml.jackson.module.paramnames.ParameterNamesModule
 import org.bisdk.AuthenticationException
 import org.bisdk.BiError
 import org.bisdk.Command
+import org.bisdk.Logger
 import org.bisdk.Payload
 import java.net.SocketException
 

@@ -3,6 +3,7 @@ package org.bisdk.sdk
 import kotlinx.io.errors.IOException
 import org.bisdk.Command
 import org.bisdk.Lengths
+import org.bisdk.Logger
 import org.bisdk.decodeFromGW
 import org.bisdk.toHexStringFromGW
 import org.bisdk.waitFor

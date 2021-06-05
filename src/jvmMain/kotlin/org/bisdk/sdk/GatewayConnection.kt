@@ -1,6 +1,7 @@
 package org.bisdk.sdk
 
 import org.bisdk.Command
+import org.bisdk.Logger
 import org.bisdk.toHexString
 import java.io.DataInputStream
 import java.io.DataOutputStream

@@ -1,6 +1,7 @@
 package org.bisdk.sdk
 
 import kotlinx.coroutines.runBlocking
+import org.bisdk.Logger
 import org.junit.Before
 import org.junit.Test
 
