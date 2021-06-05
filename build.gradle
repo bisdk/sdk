@@ -22,6 +22,11 @@ repositories {
 }
 
 kotlin {
+
+    js {
+        nodejs()
+    }
+
     targets {
         fromPreset(presets.jvm, 'jvm') {
             configure([compilations.main, compilations.test]) {
@@ -46,6 +51,7 @@ kotlin {
             dependencies {
                 implementation 'org.jetbrains.kotlin:kotlin-stdlib-common'
                 implementation "org.jetbrains.kotlinx:kotlinx-io:$kotlinx_io_version"
+                implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0'
             }
         }
         commonTest {

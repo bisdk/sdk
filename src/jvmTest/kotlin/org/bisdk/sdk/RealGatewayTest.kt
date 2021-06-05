@@ -1,5 +1,6 @@
 package org.bisdk.sdk
 
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
 
@@ -31,9 +32,9 @@ internal class RealGatewayTest {
      *  </ul>
      */
     @Test
-    fun testStartup() {
+    fun testStartup()  = runBlocking {
         if (ignoreTests) {
-            return
+            return@runBlocking
         }
 
         val discovery = Discovery()
@@ -58,9 +59,9 @@ internal class RealGatewayTest {
     }
 
     @Test
-    fun testPing() {
+    fun testPing()  = runBlocking {
         if (ignoreTests) {
-            return
+            return@runBlocking
         }
         val discovery = Discovery()
         val future = discovery.startServer()
@@ -79,9 +80,9 @@ internal class RealGatewayTest {
     }
 
     @Test
-    fun testGetTransitionTiming() {
+    fun testGetTransitionTiming() = runBlocking {
         if (ignoreTests) {
-            return
+            return@runBlocking
         }
         val discovery = Discovery()
         val future = discovery.startServer()
@@ -115,9 +116,9 @@ internal class RealGatewayTest {
     }
 
     @Test
-    fun testGetGroupsTiming() {
+    fun testGetGroupsTiming() = runBlocking {
         if (ignoreTests) {
-            return
+            return@runBlocking
         }
         val discovery = Discovery()
         val future = discovery.startServer()

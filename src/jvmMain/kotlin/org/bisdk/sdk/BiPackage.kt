@@ -1,6 +1,14 @@
 package org.bisdk.sdk
 
-import org.bisdk.*
+import org.bisdk.BiError
+import org.bisdk.Command
+import org.bisdk.Lengths
+import org.bisdk.Payload
+import org.bisdk.testBit
+import org.bisdk.toByteArray
+import org.bisdk.toHexByteArray
+import org.bisdk.toHexString
+
 
 /**
  * A BiPackage is sent over the socket to the gateway. It contains the command and the payload.
@@ -33,7 +41,7 @@ data class BiPackage(
 
     fun getCommandCode(): Byte {
         val code = command.code
-        if(isResponse) {
+        if (isResponse) {
             val flipped = code or (1 shl 7)
             return flipped.toByte()
         }

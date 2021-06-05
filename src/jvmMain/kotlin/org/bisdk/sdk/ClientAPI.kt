@@ -39,12 +39,12 @@ class ClientAPI(
     private var password: String? = null
     private var tag = 0
 
-    fun getName(): String {
+    suspend fun getName(): String {
         val answer = sendWithRetry(BiPackage.fromCommandAndPayload(Command.GET_NAME, Payload.empty()))
         return answer.payload.getContentAsString()
     }
 
-    fun ping(): Boolean {
+    suspend fun ping(): Boolean {
         return try {
             val answer = sendDirectly(BiPackage.fromCommandAndPayload(Command.PING, Payload.empty()))
             answer.command == Command.PING
@@ -53,7 +53,7 @@ class ClientAPI(
         }
     }
 
-    fun login(userName: String, password: String): Boolean {
+    suspend fun login(userName: String, password: String): Boolean {
         var i = 3
         while (i-- > 0) {
             val answer = sendWithRetry(
@@ -74,7 +74,7 @@ class ClientAPI(
         return false
     }
 
-    fun relogin() {
+    suspend fun relogin() {
         if (userName == null || password == null) {
             return
         }
@@ -88,14 +88,14 @@ class ClientAPI(
         gatewayConnection.readAnswer(newTag)
     }
 
-    fun getToken(userName: String, password: String): String {
+    suspend fun getToken(userName: String, password: String): String {
         if (login(userName, password)) {
             return gatewayConnection.token
         }
         throw AuthenticationException("Could not login")
     }
 
-    fun logout() {
+    suspend fun logout() {
         // We do not send logout with retry since it could be called when something is disposed after some time
         // Chances are very high that the connection is already gone
         gatewayConnection.sendMessage(
@@ -109,7 +109,7 @@ class ClientAPI(
     /**
      * The getState command returns a map of port and some kind of number. For now I don't know how to handle that
      */
-    fun getState(): HashMap<String, Int> {
+    suspend fun getState(): HashMap<String, Int> {
         var i = 3
         while (i-- > 0) {
             val answer = sendWithRetry(
@@ -134,7 +134,7 @@ class ClientAPI(
     /**
      * The groups are the paired devices. This call returns all devices known to the GW
      */
-    fun getGroups(): List<Group> {
+    suspend fun getGroups(): List<Group> {
         val answer = sendWithRetry(
             BiPackage.fromCommandAndPayload(
                 command = Command.JMCP,
@@ -155,7 +155,7 @@ class ClientAPI(
     /**
      * This will return only the devices that are paired with the current user. We probably should always use this
      */
-    fun getGroupsForUser(): List<Group> {
+    suspend fun getGroupsForUser(): List<Group> {
         val answer = sendWithRetry(
             BiPackage.fromCommandAndPayload(
                 command = Command.JMCP,
@@ -176,7 +176,7 @@ class ClientAPI(
     /**
      * Triggers an action on the device. For the garage door this means open/close the door (like pressing a button on the hand held)
      */
-    fun setState(port: Port): BiPackage {
+    suspend fun setState(port: Port): BiPackage {
         return sendWithRetry(
             BiPackage.fromCommandAndPayload(
                 command = Command.SET_STATE,
@@ -188,7 +188,7 @@ class ClientAPI(
     /**
      * Returns the current state of the port. You can see how much open it is or if it is still running.
      */
-    fun getTransition(port: Port): Transition {
+    suspend fun getTransition(port: Port): Transition {
         val answer: BiPackage = sendWithRetry(
             BiPackage.fromCommandAndPayload(
                 command = Command.HM_GET_TRANSITION,
@@ -203,7 +203,7 @@ class ClientAPI(
      *
      * It will retry certain times and try to handle special error conditions with a good retry / reconnect / relogin strategy
      */
-    private fun sendWithRetry(messageToSend: BiPackage): BiPackage {
+    private suspend fun sendWithRetry(messageToSend: BiPackage): BiPackage {
         var message = messageToSend.copy(tag = getNewTag())
         var sendCounter = 3L
         while (sendCounter-- > 0) {
@@ -280,7 +280,7 @@ class ClientAPI(
     /**
      * Send without retry and error handling
      */
-    private fun sendDirectly(messageToSend: BiPackage): BiPackage {
+    private suspend fun sendDirectly(messageToSend: BiPackage): BiPackage {
         val message = messageToSend.copy(tag = getNewTag())
         gatewayConnection.sendMessage(message)
         val tc = gatewayConnection.readAnswer(message.tag)

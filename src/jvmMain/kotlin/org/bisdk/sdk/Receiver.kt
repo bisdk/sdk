@@ -5,6 +5,7 @@ import org.bisdk.Command
 import org.bisdk.Lengths
 import org.bisdk.decodeFromGW
 import org.bisdk.toHexStringFromGW
+import org.bisdk.waitFor
 import java.io.DataInputStream
 
 class Receiver(private val dataIn: DataInputStream, private val readTimeout: Int) : Runnable {
@@ -17,7 +18,7 @@ class Receiver(private val dataIn: DataInputStream, private val readTimeout: Int
         running = false
     }
 
-    fun retrieveAnswer(tag: Int): TransportContainer {
+    suspend fun retrieveAnswer(tag: Int): TransportContainer {
         Logger.debug("Waiting for answer with tag $tag")
         waitFor(readTimeout, {
             (queue.find { message -> message.pack.tag == tag } != null) ||
