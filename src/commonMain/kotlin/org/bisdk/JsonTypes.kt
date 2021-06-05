@@ -1,20 +1,23 @@
 package org.bisdk.sdk
 
-import com.fasterxml.jackson.annotation.JsonProperty
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class Group(
-    @field:JsonProperty("ID")
+    @SerialName("ID")
     val id: Int,
-    @field:JsonProperty("NAME")
+    @SerialName("NAME")
     val name: String,
-    @field:JsonProperty("PORTS")
+    @SerialName("PORTS")
     val ports: List<Port>
 )
 
+@Serializable
 data class Port(
-    @field:JsonProperty("ID")
+    @SerialName("ID")
     val id: Int,
-    @field:JsonProperty("TYPE")
+    @SerialName("TYPE")
     val type: Int
 ) {
     override fun toString(): String {

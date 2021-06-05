@@ -1,10 +1,8 @@
 package org.bisdk.sdk
 
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.KotlinModule
-import com.fasterxml.jackson.module.kotlin.readValue
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule
+
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.bisdk.AuthenticationException
 import org.bisdk.BiError
 import org.bisdk.Command
@@ -120,11 +118,10 @@ class ClientAPI(
                 )
             )
             val json = answer.payload.getContentAsString()
-            val mapper = ObjectMapper()
-            mapper.registerModules(KotlinModule(), ParameterNamesModule())
+
             try {
-                return mapper.readValue(json)
-            } catch (e: JsonProcessingException) {
+                return Json.decodeFromString(json)
+            } catch (e: Exception) {
                 Logger.info("Could not deserialize Groups from $json, error: " + e.message + " -> retrying...")
                 Thread.sleep(500)
             }
@@ -143,11 +140,10 @@ class ClientAPI(
             )
         )
         val json = answer.payload.getContentAsString()
-        val mapper = ObjectMapper()
-        mapper.registerModules(KotlinModule(), ParameterNamesModule())
+
         try {
-            return mapper.readValue(json)
-        } catch (e: JsonProcessingException) {
+            return Json.decodeFromString(json)
+        } catch (e: Exception) {
             Logger.info("Could not deserialize Groups from $json, error: " + e.message + " -> retrying...")
             throw e
         }
@@ -164,11 +160,10 @@ class ClientAPI(
             )
         )
         val json = answer.payload.getContentAsString()
-        val mapper = ObjectMapper()
-        mapper.registerModules(KotlinModule(), ParameterNamesModule())
+
         try {
-            return mapper.readValue(json)
-        } catch (e: JsonProcessingException) {
+            return Json.decodeFromString(json)
+        } catch (e: Exception) {
             Logger.info("Could not deserialize Groups from $json, error: " + e.message + " -> retrying...")
             throw e
         }
@@ -227,13 +222,15 @@ class ClientAPI(
                 if (tc.pack.command == Command.ERROR && tc.pack.getBiError() != null && tc.pack.getBiError() == BiError.PERMISSION_DENIED) {
                     Logger.debug("Received PERMISSION_DENIED => relogin...")
                     relogin()
-                    message = messageToSend.copy(tag = getNewTag())  // try with new tag to see in log file which message was answered
+                    message =
+                        messageToSend.copy(tag = getNewTag())  // try with new tag to see in log file which message was answered
                     gatewayConnection.sendMessage(message)
                     Thread.sleep(500)
                 } else if (command == Command.ERROR) {
                     Logger.debug("Received ERROR (" + tc.pack.getBiError() + ") answer => retrying...")
                     error = "Received ERROR answer"
-                    message = messageToSend.copy(tag = getNewTag())  // try with new tag to see in log file which message was answered
+                    message =
+                        messageToSend.copy(tag = getNewTag())  // try with new tag to see in log file which message was answered
                     gatewayConnection.sendMessage(message)
                     Thread.sleep(500)
                 } else if (command == Command.EMPTY && i == 1L) {
@@ -241,7 +238,8 @@ class ClientAPI(
                     error = "Received EMPTY answer"
                     gatewayConnection.reconnect()
                     relogin()
-                    message = messageToSend.copy(tag = getNewTag())  // try with new tag to see in log file which message was answered
+                    message =
+                        messageToSend.copy(tag = getNewTag())  // try with new tag to see in log file which message was answered
                     gatewayConnection.sendMessage(message)
                     Thread.sleep(500)
                 } else if (command == Command.EMPTY) {
@@ -255,7 +253,8 @@ class ClientAPI(
                 Logger.info("Received SocketException ${e.message} => reconnecting...")
                 gatewayConnection.reconnect()
                 relogin()
-                message = messageToSend.copy(tag = getNewTag())  // try with new tag to see in log file which message was answered
+                message =
+                    messageToSend.copy(tag = getNewTag())  // try with new tag to see in log file which message was answered
                 gatewayConnection.sendMessage(message)
                 Thread.sleep(500)
             } catch (e: IllegalStateException) {
@@ -266,7 +265,8 @@ class ClientAPI(
                 error = "Received Exception ${e.message}"
                 gatewayConnection.reconnect()
                 relogin()
-                message = messageToSend.copy(tag = getNewTag())  // try with new tag to see in log file which message was answered
+                message =
+                    messageToSend.copy(tag = getNewTag())  // try with new tag to see in log file which message was answered
                 gatewayConnection.sendMessage(message)
             } catch (e: Exception) {
                 Logger.info("Received Exception ${e.message} => retrying...")
