@@ -1,6 +1,7 @@
 package org.bisdk.sdk
 
 import org.bisdk.Command
+import org.bisdk.Logger
 import org.bisdk.toHexString
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -95,7 +96,7 @@ class GatewayConnection(
     /**
      * Can throw a TimeoutException or a SocketException on error
      */
-    fun sendMessage(message: BiPackage) {
+    suspend fun sendMessage(message: BiPackage) {
         if (message.command == Command.LOGIN) {
             // Reset internal token when new login command is issued
             this.token = defaultToken
@@ -110,7 +111,7 @@ class GatewayConnection(
         sender.send(tc)
     }
 
-    fun readAnswer(tag: Int): TransportContainer {
+    suspend fun readAnswer(tag: Int): TransportContainer {
         val tc = receiver.retrieveAnswer(tag)
         Logger.debug("Received: $tc")
         if (tc.pack.command == Command.LOGIN) {

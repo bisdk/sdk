@@ -1,5 +1,6 @@
 package org.bisdk.sdk
 
+import org.bisdk.Logger
 import org.xml.sax.InputSource
 import java.io.StringReader
 import java.net.DatagramPacket

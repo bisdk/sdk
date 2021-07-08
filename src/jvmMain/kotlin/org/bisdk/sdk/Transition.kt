@@ -5,6 +5,7 @@ import java.nio.ByteBuffer
 import java.time.LocalDateTime
 import java.util.*
 
+
 data class Transition(
     /**
      * 100 is OPEN, 0 = CLOSED
@@ -44,6 +45,7 @@ data class Transition(
     }
 
     companion object {
+        @OptIn(ExperimentalUnsignedTypes::class)
         fun from(ba: ByteArray): Transition {
             val byte3 = BitSet.valueOf(ba[2].toByteArray())
             return Transition(

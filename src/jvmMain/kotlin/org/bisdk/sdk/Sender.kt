@@ -1,6 +1,8 @@
 package org.bisdk.sdk
 
+import org.bisdk.Logger
 import org.bisdk.encodeToGW
+import org.bisdk.waitFor
 import java.io.DataOutputStream
 
 /**
@@ -13,7 +15,7 @@ class Sender(private val dataOut: DataOutputStream, private val sendTimeout: Int
     private var running = true
     private var exception: Exception? = null
 
-    public fun send(message: TransportContainer) {
+    public suspend fun send(message: TransportContainer) {
         waitFor(sendTimeout, {queue.isEmpty()}, "EmptyQueue")
         queue.add(message)
         waitFor(sendTimeout, {!queue.contains(message)}, "MessageProcessed", {queue.remove(message)})
