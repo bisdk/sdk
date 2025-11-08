@@ -293,17 +293,26 @@ Sum: 9 + 0 + 0 + 38 = 47 = 0x2F
 
 ### Transport Container Checksum
 
-The Transport Container checksum is calculated using XOR of all bytes in the container (except the checksum itself).
+The Transport Container checksum is calculated by summing the ASCII values of all characters in the hex string representation (except the checksum itself) and taking the result modulo 256.
 
 **Algorithm:**
 ```kotlin
-fun calculateTransportChecksum(tc: TransportContainer): Byte {
-    var checksum = 0
-    tc.sender.toHexByteArray().forEach { checksum = checksum xor it.toInt() }
-    tc.receiver.toHexByteArray().forEach { checksum = checksum xor it.toInt() }
-    tc.biPackage.toByteArray().forEach { checksum = checksum xor it.toInt() }
-    return (checksum and 0xFF).toByte()
+fun calculateTransportChecksum(sender: String, receiver: String, pack: BiPackage): Byte {
+    val hexString = sender + receiver + pack.toHexString()
+    var value = 0
+    hexString.forEach { char ->
+        value += char.toByte()  // Add ASCII value of each hex character
+    }
+    return (value and 0xFF).toByte()  // Modulo 256
 }
+```
+
+**Example (GET_NAME):**
+```
+Hex string: "0000000000005410EC03615000090000000000262F"
+Sum of ASCII values of each character:
+  '0'(48) + '0'(48) + ... + '2'(50) + 'F'(70) = calculated sum
+Result & 0xFF = 0x4A (checksum)
 ```
 
 ## Encoding and Decoding
@@ -418,10 +427,14 @@ BiPackage hex: "00190000000000100674686F6D61736161616262626363632D"
 sender = "000000000000" (app)
 receiver = "5410EC036150" (gateway MAC)
 
-checksum = XOR of all bytes
-  = 0x00^0x00^0x00^0x00^0x00^0x00 (sender)
-  ^ 0x54^0x10^0xEC^0x03^0x61^0x50 (receiver)
-  ^ (all BiPackage bytes)
+**Step 3: Construct Transport Container**
+```kotlin
+sender = "000000000000" (app)
+receiver = "5410EC036150" (gateway MAC)
+
+checksum = sum of ASCII values of hex string characters
+  hexString = "0000000000005410EC03615000190000000000100674686F6D61736161616262626363632D"
+  Sum ASCII values of each character, then & 0xFF
   = 0xF0 (from test example)
 
 Final hex: "0000000000005410EC03615000190000000000100674686F6D61736161616262626363632DF0"
@@ -452,7 +465,11 @@ BiPackage hex: "00090000000000262F"
 ```kotlin
 sender = "000000000000"
 receiver = "5410EC036150"
-checksum = 0x4A
+
+checksum = sum of ASCII values of hex string characters
+  hexString = "0000000000005410EC03615000090000000000262F"
+  Sum ASCII values of each character, then & 0xFF
+  = 0x4A (from test example)
 
 Final hex: "0000000000005410EC03615000090000000000262F4A"
 ```
