@@ -398,34 +398,14 @@ tag = 0
 length = 9 + 16 = 25 = 0x0019
 
 checksum calculation:
-  25 + 0 + 0 + 16 + (sum of payload bytes)
-  = 25 + 0 + 0 + 16 + (6+116+104+111+109+97+115+97+97+97+98+98+98+99+99+99)
-  = 25 + 16 + 1387
-  = 1428
-  = 0x594
-  & 0xFF = 0x94... wait, let me recalculate properly
-  
-Actually: 25 + 0 + 0 + 16 + 1387 = 1428 mod 256 = 148 = 0x94
-No wait, in the test it shows 0x2D
-
-Let me check the actual test value...
-From test: "00190000000000100674686F6D61736161616262626363632D"
-Checksum is 0x2D = 45
-
-Recalculating: 
-  0x19(25) + 0(tag) + 0(token) + 0x10(16) + sum_of_payload
-  Payload bytes: 06,74,68,6F,6D,61,73,61,61,61,62,62,62,63,63,63
-  Sum: 6+116+104+111+109+97+115+97+97+97+98+98+98+99+99+99 = 1540
-  Total: 25 + 0 + 16 + 1540 = 1581
-  1581 mod 256 = 45 = 0x2D ✓
+  length + tag + token_bytes + command + payload_bytes
+  = 25 + 0 + (0+0+0+0) + 16 + (6+116+104+111+109+97+115+97+97+97+98+98+98+99+99+99)
+  = 25 + 0 + 0 + 16 + 1540
+  = 1581
+  = 1581 mod 256 = 45 = 0x2D
 
 BiPackage hex: "00190000000000100674686F6D61736161616262626363632D"
 ```
-
-**Step 3: Construct Transport Container**
-```kotlin
-sender = "000000000000" (app)
-receiver = "5410EC036150" (gateway MAC)
 
 **Step 3: Construct Transport Container**
 ```kotlin
