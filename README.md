@@ -74,6 +74,18 @@ Currently working:
 # Analysis
 
 ## Protocol
+
+**For detailed protocol documentation, see [PROTOCOL.md](PROTOCOL.md)** - This document provides comprehensive information on how messages are constructed and deconstructed, including:
+- Complete message structure and layering
+- Transport Container format
+- BiPackage (inner package) format
+- Payload formats for all commands
+- Checksum calculation algorithms
+- Encoding/decoding between formats
+- Step-by-step examples for common operations
+
+### Overview
+
 This is the result of the Reverse Engineering of the App &lt;-> BiSecure Gateway Protocol
 It is the attempt to reverse engineer the protocol between the Hoermann BiSecure gateway and the corresponding app.
 
