@@ -11,7 +11,7 @@ internal class BiPackageChecksumTest {
     @Test
     fun calculate() {
         val testPackage = BiPackage(command = Command.LOGIN, payload = Payload.login("thomas", "aaabbbccc"))
-        val checksum = PackageChecksum(testPackage).calculate()
+        val checksum = testPackage.getCheckSum()
         Assertions.assertThat(checksum.toByte().toHexString()).isEqualToIgnoringCase("2d")
     }
 }
