@@ -7,6 +7,7 @@ import org.bisdk.Payload
 import org.bisdk.testBit
 import org.bisdk.toByteArray
 import org.bisdk.toHexByteArray
+import org.bisdk.toHexInt
 import org.bisdk.toHexString
 
 
@@ -22,11 +23,27 @@ data class BiPackage(
     val checksum: Byte = 0
 ) {
 
-    val calculatedChecksum = PackageChecksum(this).calculate().toByte()
+    val calculatedChecksum = getCheckSum().toByte()
 
     init {
         assert(token.length == 8)
     }
+
+    fun getCheckSum(): Int {
+        var value = getLength()
+        value += tag
+        value += (token.toHexInt() and 255)
+        value += (token.toHexInt() shr 8 and 255)
+        value += (token.toHexInt() shr 16 and 255)
+        value += (token.toHexInt() shr 24 and 255)
+        value += getCommandCode()
+        payload.toByteArray().forEach {
+            value += it
+        }
+        value = value and 255
+        return value
+    }
+
 
     fun hasCorrectChecksum() = checksum == calculatedChecksum
 
@@ -81,7 +98,7 @@ data class BiPackage(
 
         fun fromCommandAndPayload(command: Command, payload: Payload): BiPackage {
             val packWithoutChecksum = BiPackage(command = command, payload = payload)
-            val checksum = PackageChecksum(packWithoutChecksum).calculate().toByte()
+            val checksum = packWithoutChecksum.getCheckSum().toByte()
             return BiPackage(command = command, payload = payload, checksum = checksum)
         }
 

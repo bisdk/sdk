@@ -1,9 +1,13 @@
 package org.bisdk.sdk
 
-import org.bisdk.toByteArray
 import java.nio.ByteBuffer
-import java.time.LocalDateTime
-import java.util.*
+import java.util.BitSet
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import org.bisdk.toByteArray
 
 
 data class Transition(
@@ -45,7 +49,7 @@ data class Transition(
     }
 
     companion object {
-        @OptIn(ExperimentalUnsignedTypes::class)
+        @OptIn(ExperimentalTime::class)
         fun from(ba: ByteArray): Transition {
             val byte3 = BitSet.valueOf(ba[2].toByteArray())
             return Transition(
@@ -57,7 +61,8 @@ data class Transition(
                 gk = ByteBuffer.wrap(ba.copyOfRange(4, 6)).short.toInt(),
                 hcp = HCP.from(ba.copyOfRange(6, 8)),
                 exst = ba.copyOfRange(8, 16).toList().reversed(),
-                time = LocalDateTime.now(),
+                time = Instant.fromEpochMilliseconds(System.currentTimeMillis())
+                    .toLocalDateTime(TimeZone.currentSystemDefault()),
                 ignoreRetries = true
             )
         }

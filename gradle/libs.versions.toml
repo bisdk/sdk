@@ -1,0 +1,37 @@
+[versions]
+agp = "8.13.0"
+assertjCore = "3.27.6"
+kotlin = "2.2.21"
+android-minSdk = "24"
+android-compileSdk = "36"
+kotlinxDatetime = "0.7.1"
+kotlinxCoroutinesCore = "1.10.2"
+kotlinxIo = "0.1.16"
+kotlinxIoJs = "0.1.16"
+kotlinxIoJvm = "0.1.16"
+kotlinxSerializationJson = "1.9.0"
+vanniktechMavenPublish = "0.34.0"
+ktor = "3.3.2"
+
+[libraries]
+assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertjCore" }
+kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
+kotlin-stdlib-common = { module = "org.jetbrains.kotlin:kotlin-stdlib-common", version.ref = "kotlin" }
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlin-test-common = { module = "org.jetbrains.kotlin:kotlin-test-common" }
+kotlin-test-annotations-common = { module = "org.jetbrains.kotlin:kotlin-test-annotations-common" }
+kotlin-test-js = { module = "org.jetbrains.kotlin:kotlin-test-js" }
+kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
+kotlinx-io = { module = "org.jetbrains.kotlinx:kotlinx-io", version.ref = "kotlinxIo" }
+kotlinx-io-js = { module = "org.jetbrains.kotlinx:kotlinx-io-js", version.ref = "kotlinxIoJs" }
+kotlinx-io-jvm = { module = "org.jetbrains.kotlinx:kotlinx-io-jvm", version.ref = "kotlinxIoJvm" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+ktorNetwork = { module = "io.ktor:ktor-network", version.ref = "ktor" }
+ktorIo = { module = "io.ktor:ktor-io", version.ref = "ktor" }
+
+[plugins]
+android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
+kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+vanniktech-mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktechMavenPublish" }

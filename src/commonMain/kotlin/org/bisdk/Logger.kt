@@ -1,6 +1,7 @@
 package org.bisdk
 
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 
 /**
@@ -30,6 +31,7 @@ class Logger {
     }
 }
 
+@OptIn(ExperimentalTime::class)
 class PrintlnAdapter : LoggerAdapter {
     override fun debug(message: String) {
         println(Clock.System.now().toString() + " DEBUG: " + message)
